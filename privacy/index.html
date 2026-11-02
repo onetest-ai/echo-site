@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy · Echo by onetest</title>
+<meta name="description" content="What Echo records, where it is stored, and what is sent where.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="/assets/brand/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/"><img class="mark" src="/assets/brand/onetest-logo-128.png" alt="onetest" width="30" height="30">Echo <small>by onetest</small></a>
+    <nav aria-label="Main">
+      <a class="opt" href="/#tour">What it does</a>
+      <a href="/privacy/" aria-current="page">Privacy</a>
+      <a class="btn primary small" href="https://github.com/onetest-ai/echo/releases/latest">Download <span class="tag">beta</span></a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="doc">
+  <div class="wrap">
+    <h1>Privacy</h1>
+    <p class="meta">Applies to the Echo desktop app for macOS and Windows. Last updated 2 November 2026.</p>
+
+    <div class="summary">
+      <p>Echo has no servers of ours and collects no telemetry or analytics. Your recordings, transcripts and notes stay on your computer. Apart from an update check with GitHub, data leaves your computer only for services you set up yourself. All of them are listed below.</p>
+    </div>
+
+    <h2>What Echo records</h2>
+    <ul>
+      <li>Echo records <strong>only the calls you start recording</strong>. It never records a call on its own. You start each recording yourself, from the app, its window, the command line, or a calendar meeting you've set to record.</li>
+      <li>A recording has two tracks: your microphone and the call's audio.</li>
+      <li>The audio stays on your computer and is <strong>deleted once it has been transcribed</strong>, unless you turn on keeping audio.</li>
+      <li>Transcripts, minutes and your notes are ordinary files in a folder you choose. To delete them, delete the files. Uninstalling Echo does not delete this folder.</li>
+    </ul>
+
+    <h2>Transcription</h2>
+    <p>Speech is turned into text <strong>on your computer</strong> (whisper.cpp or NVIDIA Nemotron), or on a transcription server <strong>you</strong> connect Echo to. Echo never sends audio to a cloud speech service by default.</p>
+
+    <h2>What is sent, and where</h2>
+    <p>Echo talks to the services below, and only the ones you turn on. Each one is reached directly from your computer. Nothing goes through onetest.</p>
+    <table>
+      <thead><tr><th>Service</th><th>When</th><th>What is sent</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Your AI for minutes and live notes</td>
+          <td>When minutes or live notes are written for a call you recorded</td>
+          <td>The call's transcript, your notes and the meeting's details go to the AI you set up. That is either Claude, through your own Claude Code / Claude account (Anthropic), or a local model such as Ollama on your computer. The provider's own terms apply, for example <a href="https://www.anthropic.com/legal/privacy">Anthropic's privacy policy</a>.</td>
+        </tr>
+        <tr>
+          <td>Microsoft 365 <span class="opt-note">optional</span></td>
+          <td>Only if you sign in, which happens in your browser</td>
+          <td>Read-only access to your calendar, the meeting's Teams chat, and people's directory details (names, titles). If the Brain is on, also the Teams channels and mail you choose. Requests go straight from your computer to Microsoft Graph. Sign-in tokens are stored on your computer. <a href="https://privacy.microsoft.com/privacystatement">Microsoft's privacy statement</a> applies.</td>
+        </tr>
+        <tr>
+          <td>The Brain's embeddings <span class="opt-note">optional, off by default</span></td>
+          <td>If the Brain is on and you set an embedding endpoint</td>
+          <td>Text from your calls and chosen sources goes only to the endpoint you configure, for example Ollama on your computer. Without one, the Brain searches by words only, and nothing is sent.</td>
+        </tr>
+        <tr>
+          <td>Your transcription server <span class="opt-note">optional</span></td>
+          <td>If you connect Echo to one</td>
+          <td>The call's audio, to the server you named.</td>
+        </tr>
+        <tr>
+          <td>GitHub</td>
+          <td>Update check</td>
+          <td>Echo asks GitHub for the latest release of Echo. Nothing about you or your calls is included. <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub's privacy statement</a> applies.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Other things stored with a call</h2>
+    <ul>
+      <li><strong>Screenshots of shared screens</strong> (optional, off by default): when on, Echo captures slides and screens shared in the call so they can go into the minutes. They are stored on your computer with the call.</li>
+      <li><strong>Speaker names</strong>: Echo reads the Teams window to tell who is speaking. What it reads is stored on your computer with the call.</li>
+    </ul>
+
+    <h2>Recording other people</h2>
+    <p>Many places require the consent of everyone on a call before it is recorded. Telling participants and getting their consent is your responsibility. Echo records only when you tell it to.</p>
+
+    <h2>Questions</h2>
+    <p>Ask in the project's <a href="https://github.com/onetest-ai/echo/issues">GitHub issues</a>. <span class="todo">TODO: add a contact email if you want one.</span></p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <nav aria-label="Footer">
+      <a href="/privacy/">Privacy</a>
+      <a href="/code-signing/">Code signing policy</a>
+      <a href="/trademark/">Trademark</a>
+      <a href="https://github.com/onetest-ai/echo">GitHub</a>
+    </nav>
+    <span class="made"><img src="/assets/brand/onetest-logo-128.png" alt="" width="20" height="20">© 2026 onetest</span>
+  </div>
+</footer>
+</body>
+</html>

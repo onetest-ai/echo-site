@@ -1,0 +1,9 @@
+[
+ {"op": "create", "ref": "d5", "kind": "decision", "parent": "S002", "title": "Cutover on Sunday 16 November, evening", "decided_by": "Sofia Reyes", "description": "Monday's first wave runs on the new system; Monday-morning cutovers go wrong.", "quote": "a cutover on Sunday the sixteenth in the evening, so Monday's morning wave already runs on the new system."},
+ {"op": "create", "ref": "d6", "kind": "decision", "parent": "S002", "title": "Paper runsheets as the fallback in week one", "decided_by": "Sofia Reyes", "quote": "For the first week I want paper runsheets as a fallback. If the system is down, the drivers still leave on time."},
+ {"op": "status", "node": "T007", "effect": "progress", "quote": "Jonas says the bulk run fixed about eighty percent. My team is checking the industrial park addresses by hand.", "note": "~80% geocoded; the rest checked by hand"},
+ {"op": "create", "ref": "q2", "kind": "question", "parent": "S002", "title": "Is 80% geocoded enough to say go for Antwerp?", "quote": "Is eighty percent enough to say go on the twelfth? I'd like Tom's view on that."},
+ {"op": "create", "ref": "t12", "kind": "task", "parent": "S004", "type": "action", "title": "Brief the night shift lead before the go/no-go", "client_owner": "Sofia Reyes", "due_text": "before the go/no-go", "quote": "Please brief him before the go/no-go, he should be in that meeting."},
+ {"op": "waiting", "node": "T012", "who": "Night shift lead", "what": "back from leave on Monday", "quote": "He's been on leave, he's back on Monday."},
+ {"op": "create", "ref": "t13", "kind": "task", "parent": "S002", "type": "action", "title": "Update the cutover plan and send it round", "internal_owner": "Priya Nair", "due_text": "tonight", "quote": "I'll update the cutover plan with Sunday evening and the paper fallback and send it round tonight."}
+]

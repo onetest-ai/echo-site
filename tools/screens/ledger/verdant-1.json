@@ -1,0 +1,13 @@
+[
+ {"op": "create", "ref": "e1", "kind": "epic", "plan": "Off-plan", "title": "Discovery", "quote": "onboarding a new supplier takes us six weeks on average, and we onboard about two hundred a year."},
+ {"op": "create", "ref": "s1", "kind": "story", "parent": "e1", "title": "Today's onboarding understood", "ac": ["Onboarding time and volumes known", "Where the time goes documented", "Success measures agreed"], "quote": "onboarding a new supplier takes us six weeks on average, and we onboard about two hundred a year."},
+ {"op": "ac_met", "node": "s1", "ac": 1, "ac_text": "Onboarding time and volumes known", "quote": "onboarding a new supplier takes us six weeks on average, and we onboard about two hundred a year."},
+ {"op": "create", "ref": "t2", "kind": "task", "parent": "s1", "type": "dependency", "title": "Spring supplier survey (volumes by category)", "client_owed": true, "client_owner": "Raj Mehta", "due_text": "today", "quote": "Yes, I'll send the supplier survey today, it has the volumes by category."},
+ {"op": "create", "ref": "e2", "kind": "epic", "plan": "Off-plan", "title": "Proposal", "quote": "We'll come back with a proposal and two options. Can we have it to you by the fifth of November?"},
+ {"op": "create", "ref": "s2", "kind": "story", "parent": "e2", "title": "Proposal with two options delivered", "ac": ["Two options with scope and price", "Fit with SAP Ariba described", "Reviewed with the CIO before sending"], "due_text": "the fifth of November", "quote": "We'll come back with a proposal and two options. Can we have it to you by the fifth of November?"},
+ {"op": "create", "ref": "t1", "kind": "task", "parent": "s2", "type": "action", "title": "Write the proposal with two options", "internal_owner": "Me", "due_text": "the fifth of November", "quote": "We'll come back with a proposal and two options. Can we have it to you by the fifth of November?"},
+ {"op": "create", "ref": "t3", "kind": "task", "parent": "s2", "type": "session", "title": "Proposal review with Lucas (CIO)", "client_owner": "Hannah Brooks", "due_text": "next week", "quote": "I'll set that up for next week's review."},
+ {"op": "create", "ref": "q1", "kind": "question", "parent": "s2", "title": "How must the portal fit with SAP Ariba?", "quote": "He'll want to know how this fits with Ariba."},
+ {"op": "create", "ref": "q2", "kind": "question", "parent": "s2", "title": "What budget range should the options fit?", "quote": "I can't give you a number today. Send us options and we'll talk."},
+ {"op": "create", "ref": "r1", "kind": "risk", "parent": "s2", "title": "The CIO is sceptical of new tools", "likelihood": "med", "impact": "high", "quote": "He's sceptical of new tools, to be honest."}
+]

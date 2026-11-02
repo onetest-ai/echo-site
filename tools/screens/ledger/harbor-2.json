@@ -1,0 +1,11 @@
+[
+ {"op": "status", "node": "T003", "effect": "held", "quote": "I matched the three depot lists. Out of fourteen hundred and sixty records, two hundred and twelve are duplicates or conflict on opening hours.", "note": "212 of 1,460 depot records conflict"},
+ {"op": "create", "ref": "d2", "kind": "decision", "parent": "S003", "title": "The ERP is the master for depot data", "decided_by": "Tom Okafor", "description": "Finance keeps the ERP current because invoicing depends on it; the dispatchers' sheet becomes a correction list only.", "quote": "Let's decide that: the ERP is the master for depot data, full stop."},
+ {"op": "ac_met", "node": "S003", "ac": 1, "ac_text": "One source of truth chosen", "quote": "Let's decide that: the ERP is the master for depot data, full stop."},
+ {"op": "answer", "node": "R001", "text": "The ERP becomes the single source; Jonas merges the corrections into one clean export.", "internal_owner": "Ben Carter", "likelihood": "med", "quote": "Then I'd propose the ERP is the source of truth, and we import only from the ERP."},
+ {"op": "create", "ref": "t5", "kind": "task", "parent": "S003", "type": "dependency", "title": "Clean ERP export with corrections merged", "client_owed": true, "client_owner": "Jonas Weber", "due_text": "the twenty-eighth of October", "quote": "I can have a clean export with the corrections merged by the twenty-eighth of October."},
+ {"op": "create", "ref": "t6", "kind": "task", "parent": "S003", "type": "action", "title": "Import mapping and validation report", "internal_owner": "Ben Carter", "depends_on": ["t5"], "quote": "I'll write the mapping and a validation report for the import."},
+ {"op": "create", "ref": "r2", "kind": "risk", "parent": "S002", "title": "Antwerp delivery addresses lack geocodes", "likelihood": "med", "impact": "high", "quote": "If the geocodes aren't fixed, Antwerp can't go live on the seventeenth."},
+ {"op": "create", "ref": "t7", "kind": "task", "parent": "S002", "type": "action", "title": "Bulk-geocode Antwerp addresses", "client_owner": "Jonas Weber", "due_text": "this week", "quote": "I'll run the bulk geocoding and send Sofia's team the list of addresses to check by hand."},
+ {"op": "link", "node": "S002", "depends_on": "S003", "quote": "Then the import depends on your export, and Antwerp depends on the geocodes."}
+]

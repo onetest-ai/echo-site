@@ -1,0 +1,37 @@
+<!-- For screenshots only: what "Claude · this call" shows after one question, drawn as the terminal
+     draws it (shot.js puts it in the panel for ?inject=ask). The answer uses only the demo calls'
+     words and times, and only what a call session may do: echoctl context and the Brain. -->
+<style>
+  .ask-term { background: #15151b; color: #e4e4ea; font: 13px/1.55 "Cascadia Mono", Consolas, Menlo, monospace;
+    padding: 14px 18px; height: 100%; width: calc(100vw - 68px); box-sizing: border-box; overflow: hidden; white-space: pre-wrap; }
+  .ask-term .u { color: #f2f2f6; background: #24242d; display: block; padding: 2px 6px; margin: 0 -6px 10px; }
+  .ask-term .p { color: #a98bff; }
+  .ask-term .t { color: #3fb950; }
+  .ask-term .d { color: #8a8a99; }
+  .ask-term .b { color: #ffffff; font-weight: 600; }
+  .ask-term .ts { color: #c4a7ff; }
+  .ask-term .cur { background: #e4e4ea; color: #15151b; }
+</style>
+<div class="ask-term"><span class="u"><span class="p">&gt;</span> Did we agree anything with Tom about Antwerp's geocoding, and what's still open before the go/no-go?</span><span class="t">⏺</span> <span class="b">Bash</span>(echoctl context 2026-10-30_160012-pilot-readiness-check)
+  <span class="d">⎿  Pilot readiness check · Fri 30 Oct · 28 min · Sofia Reyes, Priya Nair, you</span>
+
+<span class="t">⏺</span> <span class="b">echo-brain · search_knowledge</span>(query: "Antwerp geocoding go/no-go", thread: "dispatch-platform-rollout")
+  <span class="d">⎿  6 sections from 3 calls</span>
+
+<span class="b">⏺</span> Nothing is agreed with Tom yet: it's still open.
+
+  <span class="b">Settled</span>
+  • If Antwerp isn't ready by the go/no-go, Rotterdam goes live alone on 17 Nov
+    (your decision, Harbor · Weekly steering, 27 Oct <span class="ts">[41:35]</span>)
+  • Jonas's bulk run fixed about 80% of the Antwerp addresses; Sofia's team checks the
+    industrial-park ones by hand <span class="ts">[14:36]</span>
+
+  <span class="b">Open before the go/no-go on 12 Nov</span>
+  • Is 80% enough to say go? You asked for Tom's view <span class="ts">[16:50]</span>; Priya will ask him
+    before Friday's status <span class="ts">[18:46]</span>
+  • The night shift lead isn't briefed yet: he's back from leave on Monday <span class="ts">[19:47]</span>
+
+  Next step: put "Antwerp geocoding: enough, or Rotterdam alone?" on the go/no-go agenda,
+  so Maya decides it in the room.
+
+<span class="p">&gt;</span> <span class="cur"> </span></div>

@@ -1,0 +1,7 @@
+.agents/
+.claude/
+.taste-skill/
+skills-lock.json
+tools/screens/out/
+__pycache__/
+_drafts/

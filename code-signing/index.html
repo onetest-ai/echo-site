@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Code signing policy · Echo by onetest</title>
+<meta name="description" content="How Echo's Windows releases are built and signed.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="/assets/brand/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/"><img class="mark" src="/assets/brand/onetest-logo-128.png" alt="onetest" width="30" height="30">Echo <small>by onetest</small></a>
+    <nav aria-label="Main">
+      <a class="opt" href="/#tour">What it does</a>
+      <a href="/privacy/">Privacy</a>
+      <a class="btn primary small" href="https://github.com/onetest-ai/echo/releases/latest">Download <span class="tag">beta</span></a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="doc">
+  <div class="wrap">
+    <h1>Code signing policy</h1>
+    <p class="meta">Applies to the Windows releases of Echo.</p>
+
+    <div class="summary">
+      <p class="notice">Free code signing provided by <a href="https://about.signpath.io">SignPath.io</a>, certificate by <a href="https://signpath.org">SignPath Foundation</a></p>
+    </div>
+
+    <h2>What is signed</h2>
+    <p>The Windows binaries of Echo, the <code>echoctl.exe</code> program and its MSI installer, are built from the public source repository <a href="https://github.com/onetest-ai/echo">github.com/onetest-ai/echo</a> by GitHub Actions, using the workflow <a href="https://github.com/onetest-ai/echo/blob/main/.github/workflows/windows-release.yml"><code>.github/workflows/windows-release.yml</code></a>. They are then signed through SignPath. Signing happens only for builds from that workflow, never for binaries built on someone's own computer.</p>
+    <p>Every release must be approved by hand before it is signed. Only official Echo releases are signed.</p>
+
+    <h2>Team roles</h2>
+    <table>
+      <thead><tr><th>Role</th><th>Responsibility</th><th>Members</th></tr></thead>
+      <tbody>
+        <tr><td>Committers</td><td>Trusted to change the source code in the repository without further review.</td><td>The onetest team: <span class="todo">TODO: names or GitHub team link</span></td></tr>
+        <tr><td>Reviewers</td><td>Review every change proposed by people who are not committers, for example pull requests.</td><td>The onetest team: <span class="todo">TODO: names or GitHub team link</span></td></tr>
+        <tr><td>Approvers</td><td>Approve each signing request, and decide whether a release may be signed.</td><td>The onetest team: <span class="todo">TODO: names or GitHub owners link</span></td></tr>
+      </tbody>
+    </table>
+    <p>All team members use multi-factor authentication for both SignPath and GitHub.</p>
+
+    <h2>Privacy policy</h2>
+    <p>This program will not transfer any information to other networked systems unless specifically requested by the user or the person installing or operating it. The services Echo can connect to, all set up by the user, are described in the <a href="/privacy/">privacy policy</a>.</p>
+
+    <h2>Installing and uninstalling</h2>
+    <p>On Windows, Echo installs with its MSI installer. To uninstall, open <strong>Settings → Apps → Installed apps</strong>, find Echo and choose <strong>Uninstall</strong>. Uninstalling leaves your data folder (transcripts, minutes, notes) in place. Delete that folder yourself if you no longer want it.</p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <nav aria-label="Footer">
+      <a href="/privacy/">Privacy</a>
+      <a href="/code-signing/">Code signing policy</a>
+      <a href="/trademark/">Trademark</a>
+      <a href="https://github.com/onetest-ai/echo">GitHub</a>
+    </nav>
+    <span class="made"><img src="/assets/brand/onetest-logo-128.png" alt="" width="20" height="20">© 2026 onetest</span>
+  </div>
+</footer>
+</body>
+</html>

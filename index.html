@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Echo by onetest: your client calls, written up and kept</title>
+<meta name="description" content="Echo turns the Teams calls you choose to record, your chats, mail and project files into minutes, a work board that keeps itself current, and answers. Kept on your own computer.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6f6f8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141418" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/assets/brand/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
+<meta property="og:title" content="Echo by onetest: the memory of your client work">
+<meta property="og:description" content="Minutes, a work board that keeps itself current, and answers across every client, from the calls you choose to record. Kept on your own computer.">
+<meta property="og:image" content="https://echo.onetest.ai/assets/brand/og.png">
+<script>document.documentElement.classList.add('js')</script>
+<link rel="stylesheet" href="/assets/home.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="bar">
+  <a class="brand" href="/"><img src="/assets/brand/onetest-logo-128.png" alt="" width="28" height="28">Echo</a>
+  <nav aria-label="Main">
+    <a href="#changed">What changed</a>
+    <a href="#tour">From call to answer</a>
+    <a href="#privacy">Privacy</a>
+    <a class="btn small" href="https://github.com/onetest-ai/echo/releases/latest">Download</a>
+  </nav>
+</header>
+
+<main id="main">
+
+<section class="hero" aria-labelledby="title">
+  <div class="hero-text">
+    <h1 id="title">Your client calls, written up and kept.</h1>
+    <div class="hero-side">
+      <p>Echo records the Teams calls you choose and transcribes them on your computer. Claude then writes the minutes and keeps each client's board of tasks, decisions and risks up to date, every item with the words it came from.</p>
+      <p class="hero-act"><a class="btn" href="https://github.com/onetest-ai/echo/releases/latest">Download the beta</a><span>macOS 14.2+ on Apple Silicon · Windows 10 2004+</span></p>
+    </div>
+  </div>
+  <div class="why" aria-label="Why Echo">
+    <p><b>The problem.</b> For consultants, account and delivery leads and PMs who work with several clients, the things that matter are said in calls: a date agreed, a task promised, a risk raised. A week later, nobody is sure who said what.</p>
+    <p><b>What Echo does.</b> It records the calls you choose, transcribes them on your computer, and writes down what was decided, who owes what and what's still open, with the exact words and the time they were said.</p>
+    <p><b>What you get.</b> Minutes after every call, one board per client that keeps itself current, a list of what you owe and what you're waiting for, and answers to "what did we agree about this?"</p>
+  </div>
+  <figure class="window hero-shot" style="--w:1280px">
+    <picture><source srcset="/assets/screens/hero-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/hero.png?v=3" alt="A client thread in Echo: the work board, with a task open showing the quotes behind it" width="1280" height="800"></picture>
+  </figure>
+</section>
+
+<section class="changed" id="changed" aria-labelledby="changed-h">
+  <div class="changed-head">
+    <h2 id="changed-h">What this call changed</h2>
+    <p>After every call, Echo shows what it changed on the client's board: each task, decision, risk and question, with the words that caused it, who said them and when. Try it on a made-up call.</p>
+  </div>
+  <form class="demo" data-ui aria-label="A made-up call and the board it updates" onsubmit="return false">
+    <div class="demo-board" aria-live="polite">
+      <p class="demo-title"><b>Retail client</b> · Checkout rebuild <span>Weekly planning, Thu 12 Nov</span></p>
+      <div class="demo-cols">
+        <div>
+          <p class="demo-group">Decisions</p>
+          <article class="card" data-m="1"><p class="ui-kind decision">Decision</p><p class="ui-title">Ship onboarding behind a flag on the 14th</p><p class="ui-quote">“Let's agree on the 14th, behind a flag, and widen it after a week.” <span>Product lead · 04:12</span></p></article>
+          <article class="card" data-m="6"><p class="ui-kind decision">Decision</p><p class="ui-title">Gift cards move to phase two</p><p class="ui-quote">“Let's take gift cards out of this release.” <span>Product lead · 27:15</span></p></article>
+          <p class="demo-empty">Nothing decided yet.</p>
+        </div>
+        <div>
+          <p class="demo-group">Tasks, risks, questions</p>
+          <article class="card" data-m="2"><p class="ui-kind task">Task</p><p class="ui-title">Send the revised estimate</p><p class="ui-meta">You · due Thu 12 Nov</p><p class="ui-quote">“I'll redo the estimate with the new scope.” <span>You · 09:51</span></p></article>
+          <article class="card" data-m="3"><p class="ui-kind task">Task</p><p class="ui-title">Share the empty-state mockups</p><p class="ui-meta">Design lead · owed to you</p><p class="ui-quote">“I'll share them after this.” <span>Design lead · 16:30</span></p></article>
+          <article class="card" data-m="4"><p class="ui-kind question">Question</p><p class="ui-title">Who signs off on the pricing copy?</p><p class="ui-quote">“Who has the final say?” <span>Engineering · 21:04</span></p></article>
+          <article class="card" data-m="5"><p class="ui-kind risk">Risk</p><p class="ui-title">Payment vendor may slip a week</p><p class="ui-quote">“Their sandbox still isn't stable.” <span>Engineering · 23:40</span></p></article>
+          <p class="demo-empty">Switch on a moment of the call.</p>
+        </div>
+      </div>
+    </div>
+    <fieldset class="demo-ctl">
+      <legend>Moments of the call</legend>
+      <label><span><b>04:12</b> Ship date</span><input type="checkbox" id="m1" checked></label>
+      <label><span><b>09:51</b> The estimate</span><input type="checkbox" id="m2" checked></label>
+      <label><span><b>16:30</b> Mockups</span><input type="checkbox" id="m3"></label>
+      <label><span><b>21:04</b> Pricing copy</span><input type="checkbox" id="m4"></label>
+      <label><span><b>23:40</b> Vendor sandbox</span><input type="checkbox" id="m5" checked></label>
+      <label><span><b>27:15</b> Gift cards</span><input type="checkbox" id="m6"></label>
+      <label class="q"><span>Show the quotes</span><input type="checkbox" id="mq" checked></label>
+      <a class="demo-link" href="#tour">From call to answer</a>
+    </fieldset>
+  </form>
+  <ol class="steps">
+    <li><b>Said on a call.</b> The transcript is made on your computer, with speaker names from Teams.</li>
+    <li><b>On the board, with its quote.</b> Claude, through your own account, turns it into a card.</li>
+    <li><b>Checked by a second pass.</b> Your edits always win. Nothing about people changes without your yes.</li>
+    <li><b>Closed by a later call.</b> Or by the meeting chat in between, again with the quote.</li>
+  </ol>
+  <figure class="window" style="--w:1280px">
+    <picture><source srcset="/assets/screens/board-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/board.png?v=3" alt="What this call changed in Echo: each change with the quote, speaker and time" width="1280" height="800" loading="lazy"></picture>
+    <figcaption>The same view in Echo. The data is made up.</figcaption>
+  </figure>
+</section>
+
+<section class="tour" id="tour" aria-labelledby="tour-h">
+  <h2 id="tour-h">From call to answer</h2>
+  <div class="tour-list">
+    <ol>
+      <li data-k="capture" class="is-active"><button type="button" aria-expanded="true"><span>Capture</span><small>during the call</small></button>
+        <p>Record the Teams calls you choose, or mark a meeting in your calendar to record when it starts. Echo never records on its own. Transcribed on your computer (whisper.cpp or NVIDIA Nemotron) in your languages, with speaker names from Teams. A live transcript and live notes as it happens, and "What did I miss?" when you step away.</p></li>
+      <li data-k="minutes"><button type="button" aria-expanded="false"><span>Understand</span><small>after the call</small></button>
+        <p>Minutes with decisions, actions and open questions, each line linked to the moment in the transcript. Notes you type during the call are merged in. Optionally, screenshots of shared screens where they were discussed.</p></li>
+      <li data-k="board"><button type="button" aria-expanded="false"><span>Work board</span><small>per client</small></button>
+        <p>Calls grouped into threads by meeting series, people and chat. Stories, tasks, decisions, risks and questions, kept current from calls and the meeting chat, checked by a second pass.</p></li>
+      <li data-k="tasks"><button type="button" aria-expanded="false"><span>Tasks</span><small>across threads</small></button>
+        <p>What you owe, what's owed to you, who you're waiting on, with each person's next meeting. Needs you: every decision waiting on you, in one place.</p></li>
+      <li data-k="people"><button type="button" aria-expanded="false"><span>People</span><small>per client</small></button>
+        <p>A stakeholder map by influence and interest, org charts, and who's new or gone quiet. Nothing about a person changes without your yes.</p></li>
+      <li data-k="brain"><button type="button" aria-expanded="false"><span>Remember</span><small>optional</small></button>
+        <p>The Brain, off until you turn it on: one search across calls, Teams channels, mail and project folders (Word, PowerPoint, PDF, spreadsheets, with numbers taken from the real cells). Insights per client: what's slipping, what keeps coming back, what contradicts something said earlier. Each client is kept apart from the others.</p></li>
+      <li data-k="ask"><button type="button" aria-expanded="false"><span>Ask</span><small>any time</small></button>
+        <p>Claude, built into the window, knows what you're looking at: this call, this thread, this client. The Brain is also an MCP server for your own Claude Code.</p></li>
+    </ol>
+  </div>
+  <p class="tour-desc" aria-live="polite">Record the Teams calls you choose. A live transcript and live notes as it happens, and "What did I miss?" when you step away.</p>
+  <div class="tour-pic" aria-hidden="true">
+    <figure class="shot is-active" data-k="capture" data-label="capture.png" style="--w:1280px"><picture><source srcset="/assets/screens/capture-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/capture.png?v=3" alt="A call: transcript, live notes and your own notes" width="1280" height="800" loading="lazy"></picture></figure>
+    <figure class="shot" data-k="minutes" data-label="minutes.png" style="--w:1280px"><picture><source srcset="/assets/screens/minutes-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/minutes.png?v=3" alt="Minutes with your own notes inline" width="1280" height="800" loading="lazy"></picture></figure>
+    <figure class="shot" data-k="board" data-label="hero.png" style="--w:1280px"><picture><source srcset="/assets/screens/hero-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/hero.png?v=3" alt="A client's work board with a task open, showing the quotes behind it" width="1280" height="800" loading="lazy"></picture></figure>
+    <figure class="shot" data-k="tasks" data-label="tasks.png" style="--w:1280px"><picture><source srcset="/assets/screens/tasks-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/tasks.png?v=3" alt="Tasks: what I owe and what is owed to me" width="1280" height="800" loading="lazy"></picture></figure>
+    <figure class="shot" data-k="people" data-label="people.png" style="--w:1280px"><picture><source srcset="/assets/screens/people-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/people.png?v=3" alt="A stakeholder map with proposals waiting for your yes" width="1280" height="800" loading="lazy"></picture></figure>
+    <figure class="shot" data-k="brain" data-label="brain.png" style="--w:1280px"><picture><source srcset="/assets/screens/brain-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/brain.png?v=3" alt="The Brain: two clients' topics and the calls that connect them" width="1280" height="800" loading="lazy"></picture></figure>
+    <figure class="shot" data-k="ask" data-label="ask.png" style="--w:1280px"><picture><source srcset="/assets/screens/ask-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/ask.png?v=3" alt="Asking Claude about a call: a cited answer with times that jump to the moment" width="1280" height="800" loading="lazy"></picture></figure>
+  </div>
+</section>
+
+<section class="private" id="privacy" aria-labelledby="priv-h">
+  <div>
+    <h2 id="priv-h">Private by design</h2>
+    <p>Echo has no servers of its own and collects no telemetry. Your memory is a folder of files on your computer, and call text goes only to the AI you choose: Claude through your own account, or a local model.</p>
+    <p><a href="/privacy/">Read the privacy policy</a></p>
+  </div>
+  <dl class="facts">
+    <div><dt>Echo servers</dt><dd>None</dd></div>
+    <div><dt>Telemetry</dt><dd>None</dd></div>
+    <div><dt>Call audio</dt><dd>Deleted once transcribed</dd></div>
+    <div><dt>Microsoft 365</dt><dd>Optional, read-only</dd></div>
+  </dl>
+</section>
+
+<section class="get" aria-labelledby="get-h">
+  <h2 id="get-h">Try Echo in beta</h2>
+  <p>For macOS 14.2+ on Apple Silicon (it asks for microphone and system audio access the first time) and Windows 10 version 2004+ (the installer is built in public by GitHub Actions). A menu bar / tray app with its own window, the <code>echoctl</code> command line and a Claude Code plugin. Minutes need Claude Code with your Claude account, or a local model such as one served by Ollama.</p>
+  <p class="get-act"><a class="btn light" href="https://github.com/onetest-ai/echo/releases/latest">Download the beta</a><a href="/code-signing/">Code signing policy</a></p>
+</section>
+
+</main>
+
+<footer class="foot">
+  <p class="foot-who"><img src="/assets/brand/onetest-logo-128.png" alt="" width="32" height="32">Echo is made by onetest.</p>
+  <nav aria-label="Footer"><a href="/privacy/">Privacy</a><a href="/code-signing/">Code signing policy</a><a href="/trademark/">Trademark</a><a href="https://github.com/onetest-ai/echo">GitHub</a></nav>
+  <!-- TODO: license line goes here once Echo's license is final (moving to AGPL-3.0 before the public launch). -->
+  <p class="foot-c">© 2026 onetest</p>
+</footer>
+
+<script src="/assets/home.js" defer></script>
+</body>
+</html>
