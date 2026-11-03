@@ -22,9 +22,10 @@
 <header class="bar">
   <a class="brand" href="/"><img src="/assets/brand/onetest-logo-128.png" alt="" width="28" height="28">Echo</a>
   <nav aria-label="Main">
-    <a href="#changed">What changed</a>
     <a href="#tour">From call to answer</a>
-    <a href="#privacy">Privacy</a>
+    <a href="/extend/">Plugins</a>
+    <a href="#changed">What changed</a>
+    <a href="/privacy/">Privacy</a>
     <a class="btn small" href="https://github.com/onetest-ai/echo/releases/latest">Download</a>
   </nav>
 </header>
@@ -47,6 +48,51 @@
   <figure class="window hero-shot" style="--w:1280px">
     <picture><source srcset="/assets/screens/hero-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/hero.png?v=3" alt="A client thread in Echo: the work board, with a task open showing the quotes behind it" width="1280" height="800"></picture>
   </figure>
+</section>
+
+<section class="tour" id="tour" aria-labelledby="tour-h">
+  <h2 id="tour-h">From call to answer</h2>
+  <div class="tour-list">
+    <ol>
+      <li data-k="capture" class="is-active"><button type="button" aria-expanded="true"><span>Capture</span><small>during the call</small></button>
+        <p>Only the Teams calls you choose, or a meeting you mark in the calendar; never on its own. Transcribed on your computer (whisper.cpp or Nemotron) in your languages. Live notes and "What did I miss?".</p></li>
+      <li data-k="minutes"><button type="button" aria-expanded="false"><span>Understand</span><small>after the call</small></button>
+        <p>Minutes with decisions, actions and open questions, each line linked to its moment. Your own notes merged in; shared screens if you want them.</p></li>
+      <li data-k="board"><button type="button" aria-expanded="false"><span>Work board</span><small>per client</small></button>
+        <p>Calls grouped into threads by meeting series, people and chat. Stories, tasks, decisions, risks and questions, kept current from calls and the meeting chat, checked by a second pass.</p></li>
+      <li data-k="tasks"><button type="button" aria-expanded="false"><span>Tasks</span><small>across threads</small></button>
+        <p>What you owe, what's owed to you, who you're waiting on, with each person's next meeting. Needs you: every decision waiting on you, in one place.</p></li>
+      <li data-k="people"><button type="button" aria-expanded="false"><span>People</span><small>per client</small></button>
+        <p>A stakeholder map by influence and interest, org charts, and who's new or gone quiet. Nothing about a person changes without your yes.</p></li>
+      <li data-k="brain"><button type="button" aria-expanded="false"><span>Remember</span><small>optional</small></button>
+        <p>The Brain, off until you turn it on: one search across calls, channels, mail and project files, numbers from the real cells. Insights per client, each client kept apart.</p></li>
+      <li data-k="ask"><button type="button" aria-expanded="false"><span>Ask</span><small>any time</small></button>
+        <p>Claude, built into the window, knows what you're looking at: this call, this thread, this client. The Brain is also an MCP server for your own Claude Code.</p></li>
+    </ol>
+  </div>
+  <p class="tour-desc" aria-live="polite">Record the Teams calls you choose. A live transcript and live notes as it happens, and "What did I miss?" when you step away.</p>
+  <div class="tour-pic" aria-hidden="true">
+    <figure class="shot is-active" data-k="capture" data-label="capture.png" style="--w:1280px"><picture><source srcset="/assets/screens/capture-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/capture.png?v=3" alt="A call: transcript, live notes and your own notes" width="1280" height="800" loading="lazy"></picture></figure>
+    <figure class="shot" data-k="minutes" data-label="minutes.png" style="--w:1280px"><picture><source srcset="/assets/screens/minutes-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/minutes.png?v=3" alt="Minutes with your own notes inline" width="1280" height="800" loading="lazy"></picture></figure>
+    <figure class="shot" data-k="board" data-label="hero.png" style="--w:1280px"><picture><source srcset="/assets/screens/hero-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/hero.png?v=3" alt="A client's work board with a task open, showing the quotes behind it" width="1280" height="800" loading="lazy"></picture></figure>
+    <figure class="shot" data-k="tasks" data-label="tasks.png" style="--w:1280px"><picture><source srcset="/assets/screens/tasks-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/tasks.png?v=3" alt="Tasks: what I owe and what is owed to me" width="1280" height="800" loading="lazy"></picture></figure>
+    <figure class="shot" data-k="people" data-label="people.png" style="--w:1280px"><picture><source srcset="/assets/screens/people-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/people.png?v=3" alt="A stakeholder map with proposals waiting for your yes" width="1280" height="800" loading="lazy"></picture></figure>
+    <figure class="shot" data-k="brain" data-label="brain.png" style="--w:1280px"><picture><source srcset="/assets/screens/brain-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/brain.png?v=3" alt="The Brain: two clients' topics and the calls that connect them" width="1280" height="800" loading="lazy"></picture></figure>
+    <figure class="shot" data-k="ask" data-label="ask.png" style="--w:1280px"><picture><source srcset="/assets/screens/ask-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/ask.png?v=3" alt="Asking Claude about a call: a cited answer with times that jump to the moment" width="1280" height="800" loading="lazy"></picture></figure>
+  </div>
+</section>
+
+<section class="extend" id="extend" aria-labelledby="ext-h">
+  <div>
+    <h2 id="ext-h">Make it yours</h2>
+    <p>Plugins add what your work needs: their own code in the app and the window, installed from a marketplace after a sheet tells you what each may touch.</p>
+    <p><a href="/extend/">Write your own plugin</a></p>
+  </div>
+  <ul class="plugs">
+    <li><b>Scheduler</b><span>Your prompts on a schedule — a Monday digest, the day's plan — sent to Teams, mail or Telegram.</span></li>
+    <li><b>Telegram</b><span>Echo sends you things there, and you talk to Claude in Echo from your phone.</span></li>
+    <li><b>Obsidian</b><span>Your vaults, described for Claude and browsable in Echo: notes, backlinks, graph.</span></li>
+  </ul>
 </section>
 
 <section class="changed" id="changed" aria-labelledby="changed-h">
@@ -98,38 +144,6 @@
   </figure>
 </section>
 
-<section class="tour" id="tour" aria-labelledby="tour-h">
-  <h2 id="tour-h">From call to answer</h2>
-  <div class="tour-list">
-    <ol>
-      <li data-k="capture" class="is-active"><button type="button" aria-expanded="true"><span>Capture</span><small>during the call</small></button>
-        <p>Only the Teams calls you choose, or a meeting you mark in the calendar; never on its own. Transcribed on your computer (whisper.cpp or Nemotron) in your languages. Live notes and "What did I miss?".</p></li>
-      <li data-k="minutes"><button type="button" aria-expanded="false"><span>Understand</span><small>after the call</small></button>
-        <p>Minutes with decisions, actions and open questions, each line linked to its moment. Your own notes merged in; shared screens if you want them.</p></li>
-      <li data-k="board"><button type="button" aria-expanded="false"><span>Work board</span><small>per client</small></button>
-        <p>Calls grouped into threads by meeting series, people and chat. Stories, tasks, decisions, risks and questions, kept current from calls and the meeting chat, checked by a second pass.</p></li>
-      <li data-k="tasks"><button type="button" aria-expanded="false"><span>Tasks</span><small>across threads</small></button>
-        <p>What you owe, what's owed to you, who you're waiting on, with each person's next meeting. Needs you: every decision waiting on you, in one place.</p></li>
-      <li data-k="people"><button type="button" aria-expanded="false"><span>People</span><small>per client</small></button>
-        <p>A stakeholder map by influence and interest, org charts, and who's new or gone quiet. Nothing about a person changes without your yes.</p></li>
-      <li data-k="brain"><button type="button" aria-expanded="false"><span>Remember</span><small>optional</small></button>
-        <p>The Brain, off until you turn it on: one search across calls, channels, mail and project files, numbers from the real cells. Insights per client, each client kept apart.</p></li>
-      <li data-k="ask"><button type="button" aria-expanded="false"><span>Ask</span><small>any time</small></button>
-        <p>Claude, built into the window, knows what you're looking at: this call, this thread, this client. The Brain is also an MCP server for your own Claude Code.</p></li>
-    </ol>
-  </div>
-  <p class="tour-desc" aria-live="polite">Record the Teams calls you choose. A live transcript and live notes as it happens, and "What did I miss?" when you step away.</p>
-  <div class="tour-pic" aria-hidden="true">
-    <figure class="shot is-active" data-k="capture" data-label="capture.png" style="--w:1280px"><picture><source srcset="/assets/screens/capture-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/capture.png?v=3" alt="A call: transcript, live notes and your own notes" width="1280" height="800" loading="lazy"></picture></figure>
-    <figure class="shot" data-k="minutes" data-label="minutes.png" style="--w:1280px"><picture><source srcset="/assets/screens/minutes-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/minutes.png?v=3" alt="Minutes with your own notes inline" width="1280" height="800" loading="lazy"></picture></figure>
-    <figure class="shot" data-k="board" data-label="hero.png" style="--w:1280px"><picture><source srcset="/assets/screens/hero-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/hero.png?v=3" alt="A client's work board with a task open, showing the quotes behind it" width="1280" height="800" loading="lazy"></picture></figure>
-    <figure class="shot" data-k="tasks" data-label="tasks.png" style="--w:1280px"><picture><source srcset="/assets/screens/tasks-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/tasks.png?v=3" alt="Tasks: what I owe and what is owed to me" width="1280" height="800" loading="lazy"></picture></figure>
-    <figure class="shot" data-k="people" data-label="people.png" style="--w:1280px"><picture><source srcset="/assets/screens/people-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/people.png?v=3" alt="A stakeholder map with proposals waiting for your yes" width="1280" height="800" loading="lazy"></picture></figure>
-    <figure class="shot" data-k="brain" data-label="brain.png" style="--w:1280px"><picture><source srcset="/assets/screens/brain-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/brain.png?v=3" alt="The Brain: two clients' topics and the calls that connect them" width="1280" height="800" loading="lazy"></picture></figure>
-    <figure class="shot" data-k="ask" data-label="ask.png" style="--w:1280px"><picture><source srcset="/assets/screens/ask-dark.png?v=3" media="(prefers-color-scheme: dark)"><img src="/assets/screens/ask.png?v=3" alt="Asking Claude about a call: a cited answer with times that jump to the moment" width="1280" height="800" loading="lazy"></picture></figure>
-  </div>
-</section>
-
 <section class="private" id="privacy" aria-labelledby="priv-h">
   <div>
     <h2 id="priv-h">Private by design</h2>
@@ -147,14 +161,14 @@
 <section class="get" aria-labelledby="get-h">
   <h2 id="get-h">Try Echo in beta</h2>
   <p>For macOS 14.2+ on Apple Silicon (it asks for microphone and system audio access the first time) and Windows 10 version 2004+ (the installer is built in public by GitHub Actions). A menu bar / tray app with its own window, the <code>echoctl</code> command line and a Claude Code plugin. Minutes need Claude Code with your Claude account, or a local model such as one served by Ollama.</p>
-  <p class="get-act"><a class="btn light" href="https://github.com/onetest-ai/echo/releases/latest">Download the beta</a><a href="/code-signing/">Code signing policy</a></p>
+  <p class="get-act"><a class="btn light" href="https://github.com/onetest-ai/echo/releases/latest">Download the beta</a><a href="/windows/">Windows builds</a></p>
 </section>
 
 </main>
 
 <footer class="foot">
   <p class="foot-who"><img src="/assets/brand/onetest-logo-128.png" alt="" width="32" height="32">Echo is made by onetest.</p>
-  <nav aria-label="Footer"><a href="/privacy/">Privacy</a><a href="/code-signing/">Code signing policy</a><a href="/trademark/">Trademark</a><a href="https://github.com/onetest-ai/echo">GitHub</a></nav>
+  <nav aria-label="Footer"><a href="/privacy/">Privacy</a><a href="/extend/">Extend Echo</a><a href="/windows/">Windows builds</a><a href="/trademark/">Trademark</a><a href="https://github.com/onetest-ai/echo">GitHub</a></nav>
   <!-- TODO: license line goes here once Echo's license is final (moving to AGPL-3.0 before the public launch). -->
   <p class="foot-c">© 2026 onetest</p>
 </footer>

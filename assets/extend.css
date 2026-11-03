@@ -1,0 +1,163 @@
+/* /extend/: the home page's language (tiles, big type, the grey band), for the plugin docs. */
+.x-hero { padding-bottom: 0; }
+.x-hero .hero-side p + p { margin-top: 16px; }
+.halves { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }
+.half { background: var(--tile); border-radius: var(--r); padding: 24px; display: grid; gap: 6px; }
+.half small, .tiles code, .api code, .file figcaption { font: 13px/1.4 ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace; color: var(--accent-ink); }
+.half b { font-size: var(--t3); letter-spacing: -0.01em; }
+.half p { color: var(--muted); font-size: var(--t2); }
+code { font: 0.88em ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace; }
+.steps code { color: var(--ink); font-size: 12.5px; word-break: break-word; }
+.stepper { width: min(1100px, 100%); display: grid; gap: 24px; }
+.step-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+.step-tabs button { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 10px 16px 10px 10px; border-radius: 24px; cursor: pointer; font-size: var(--t1); font-weight: 600; color: var(--muted); white-space: nowrap; }
+.step-tabs button span { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--tile); color: var(--ink); font-size: 13px; }
+.step-tabs button[aria-selected="true"] { background: var(--tile); color: var(--ink); }
+.step-tabs button[aria-selected="true"] span { background: var(--accent); color: var(--on-accent); }
+.step-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.step-p { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 32px; align-items: start; }
+.x-js .step-p:not(.on) { display: none; }
+html:not(.x-js) .step-tabs { display: none; }
+.step-t { display: grid; gap: 10px; padding-top: 8px; }
+.step-t small { color: var(--muted); font-size: var(--t1); }
+.step-t h3 { font-family: var(--display); font-size: var(--t3); letter-spacing: -0.02em; }
+.step-t p { color: var(--muted); }
+.step-t code { color: var(--ink); }
+.step-nav { display: flex; align-items: center; gap: 16px; margin-top: 12px !important; }
+.step-nav button:not(.btn) { all: unset; cursor: pointer; color: var(--ink); font-size: var(--t1); font-weight: 600; }
+.step-nav .btn { border: 0; cursor: pointer; font: inherit; font-weight: 650; }
+.file { margin: 0; background: var(--tile); border-radius: var(--r); overflow: hidden; min-width: 0; }
+.file figcaption { padding: 12px 16px 0; }
+.file pre { margin: 0; padding: 10px 16px 16px; overflow-x: auto; font: 13px/1.55 ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace; }
+.x-uses, .x-api { max-width: 1440px; margin: 0 auto; padding: 120px var(--m) 0; display: grid; gap: 40px; }
+.x-head { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 48px; align-items: end; }
+.x-head h2 { font-family: var(--display); font-size: var(--t4); line-height: 1.05; letter-spacing: -0.03em; font-weight: 720; }
+.x-head h2 code { font-size: 0.82em; }
+.x-head p { color: var(--muted); }
+.tiles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap); }
+.tiles li { background: var(--tile); border-radius: var(--r); padding: 20px; display: grid; gap: 6px; align-content: start; }
+.tiles b { font-size: var(--t2); font-weight: 600; line-height: 1.35; }
+.tiles span { color: var(--muted); font-size: var(--t1); }
+.api { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }
+.api > div { background: var(--tile); border-radius: var(--r); padding: 24px; }
+.api h3 { font-size: var(--t3); letter-spacing: -0.01em; margin-bottom: 12px; }
+.api ul { list-style: none; margin: 0; padding: 0; }
+.api li { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 16px; padding: 10px 0; border-top: 1px solid var(--line); font-size: var(--t1); }
+.api li span { color: var(--muted); }
+.x-ex { padding-bottom: 120px; }
+.plugs a { text-decoration: none; }
+.plugs a:hover b { color: var(--accent-ink); }
+.bar nav a[aria-current] { text-decoration-color: currentColor; }
+@media (max-width: 900px) {
+  .halves, .api, .x-head, .step-p { grid-template-columns: 1fr; }
+  .tiles { grid-template-columns: 1fr 1fr; }
+  .x-uses, .x-api { padding-top: 96px; }
+}
+@media (max-width: 600px) { .tiles { grid-template-columns: 1fr; } .api li { grid-template-columns: 1fr; gap: 2px; } }
+
+/* the documentation after the hero: contents on the left, the article on the ground */
+.docs { max-width: 1440px; margin: 0 auto; padding: 96px var(--m) 120px; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 64px; align-items: start; }
+.dtoc { position: sticky; top: 24px; display: grid; gap: 2px; font-size: var(--t1); }
+.dtoc p { color: var(--muted); font-weight: 650; margin-bottom: 10px; }
+.dtoc a { text-decoration: none; color: var(--muted); padding: 7px 12px; border-radius: 18px; }
+.dtoc a:hover { color: var(--ink); }
+.dtoc a.on { background: var(--tile); color: var(--ink); font-weight: 600; }
+.dart { max-width: 880px; min-width: 0; }
+.dart > h2 { font-family: var(--display); font-size: var(--t4); letter-spacing: -0.03em; line-height: 1.05; font-weight: 720; margin: 96px 0 16px; scroll-margin-top: 24px; }
+.dart > h2:first-child { margin-top: 0; }
+.dart h3 { font-size: var(--t3); letter-spacing: -0.015em; margin: 40px 0 12px; }
+.dart > p, .dart > ul > li { color: var(--muted); }
+.dart > p { margin-bottom: 14px; max-width: 72ch; }
+.dart b { color: var(--ink); }
+.dart ul { padding-left: 20px; display: grid; gap: 8px; margin: 14px 0; }
+.dart a { color: var(--accent-ink); }
+.dart code { color: var(--ink); }
+.code { margin: 12px 0 20px; padding: 16px 18px; background: var(--tile); border-radius: var(--r); overflow-x: auto; font: 13px/1.6 ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace; }
+.code code { font: inherit; }
+.where { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap); margin: 20px 0; }
+.where div { background: var(--tile); border-radius: var(--r); padding: 16px; display: grid; gap: 6px; }
+.where small { color: var(--muted); font-size: var(--t1); }
+.where code { font-size: 12.5px; word-break: break-all; }
+.dart .stepper { width: 100%; margin-top: 20px; }
+.dart .step-tabs button { background: transparent; }
+.dart .step-tabs button[aria-selected="true"] { background: var(--tile); }
+.dart .step-tabs button span { background: var(--tile-2); }
+.dart .step-tabs button[aria-selected="true"] span { background: var(--accent); color: var(--on-accent); }
+.dart .step-tabs { gap: 2px; }
+.dart .step-tabs button { padding-right: 12px; }
+.fields { display: grid; background: var(--tile); border-radius: var(--r); overflow: hidden; margin: 16px 0; }
+.f { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 24px; padding: 16px 20px; border-top: 1px solid var(--line); }
+.f:first-child { border-top: 0; }
+.f div { display: grid; gap: 2px; align-content: start; }
+.f small { color: var(--muted); font-size: 12.5px; }
+.f p { color: var(--muted); font-size: 15.5px; }
+.caps { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); margin: 16px 0; }
+.cap { background: var(--tile); border-radius: var(--r); padding: 18px 20px; display: grid; gap: 8px; align-content: start; }
+.cap-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.cap-h code { font-weight: 650; color: var(--accent-ink); }
+.cap-h .v { font-weight: 400; color: var(--muted); font-size: 12px; }
+.cap .sheet { font-weight: 600; color: var(--ink); line-height: 1.4; }
+.cap p:not(.sheet) { color: var(--muted); font-size: 15px; }
+.fn { background: var(--tile); border-radius: var(--r); padding: 18px 20px; margin: 8px 0; }
+.fn-h { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; margin-bottom: 8px; }
+.fn-h > code { font-weight: 650; color: var(--accent-ink); font-size: 14px; }
+.needs { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+.needs code { color: var(--muted); }
+.fn p { color: var(--muted); font-size: 15.5px; }
+.fn .code { background: var(--ground); margin: 12px 0 0; }
+.sec li { color: var(--muted); }
+.exs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap); margin: 16px 0 20px; }
+.exs a { background: var(--tile); border-radius: var(--r); padding: 20px; text-decoration: none; color: var(--ink); display: grid; gap: 6px; }
+.exs a:hover b { color: var(--accent-ink); }
+.exs b { font-size: var(--t3); }
+.exs span { color: var(--muted); font-size: var(--t1); }
+@media (max-width: 1000px) { .docs { grid-template-columns: 1fr; gap: 24px; } .dtoc { position: static; display: flex; flex-wrap: wrap; } .dtoc p { width: 100%; } .caps, .exs, .where { grid-template-columns: 1fr; } .f { grid-template-columns: 1fr; gap: 6px; } }
+
+/* Quick start: the steps one after another, a number beside each, its file beside it */
+.qs { list-style: none; margin: 24px 0 0; padding: 0; display: grid; gap: 40px; counter-reset: none; }
+.qs-step { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 28px; align-items: start; position: relative; padding-left: 52px; }
+.qs-step::before { content: ""; position: absolute; left: 15px; top: 40px; bottom: -40px; width: 2px; background: var(--line); }
+.qs-step:last-child::before { display: none; }
+.qs-n { position: absolute; left: 0; top: 0; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); font-weight: 700; font-size: 14px; }
+.qs .step-t { padding-top: 2px; gap: 8px; }
+.qs .step-t h3 { margin: 0; }
+.qs .file { margin: 0; }
+@media (max-width: 1000px) { .qs-step { grid-template-columns: 1fr; gap: 14px; } }
+
+/* a capability under its Host API group: the manifest's key and the install sheet's words */
+.capline { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; padding: 10px 14px; margin: 0 0 8px; border-radius: var(--r); background: var(--violet-1); }
+.capline code { font-size: 12.5px; color: var(--accent-ink); }
+.capline span { font-size: 14px; color: var(--ink); }
+.capnote { color: var(--muted); font-size: 15px; margin: 0 0 10px; }
+
+/* slots: where a plugin's button shows, and what its target holds */
+.slots { display: grid; gap: var(--gap); margin: 12px 0 16px; }
+.slot { background: var(--tile); border-radius: var(--r); padding: 18px 20px; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 20px; }
+.slot-h { display: grid; gap: 6px; align-content: start; }
+.slot-h code { font-weight: 650; color: var(--accent-ink); }
+.slot-h span { color: var(--muted); font-size: 15px; }
+.slot-t { display: grid; gap: 4px; }
+.slot-t small { color: var(--muted); font-size: 12.5px; }
+.slot-t code { font-size: 13px; }
+.slot-t p { color: var(--muted); font-size: 14.5px; }
+@media (max-width: 1000px) { .slot { grid-template-columns: 1fr; gap: 10px; } }
+
+/* where a plugin shows up: one screenshot per place, then its code and what it gets */
+.surf-nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 8px; }
+.surf-nav a { text-decoration: none; background: var(--tile); color: var(--ink); padding: 6px 12px; border-radius: 16px; font-size: var(--t1); }
+.surf-nav a:hover { color: var(--accent-ink); }
+.surf-group { margin-top: 48px !important; }
+.surf { margin: 36px 0 0; scroll-margin-top: 24px; }
+.surf h3 { margin: 0 0 6px; }
+.where-in { color: var(--muted); margin-bottom: 12px; }
+.shot-x { margin: 0 0 12px; background: var(--tile); border-radius: var(--r); padding: 10px; }
+.shot-x { display: flex; justify-content: center; }
+.shot-x img { max-width: 100%; width: auto; height: auto; border-radius: 6px; display: block; }
+.gets { display: grid; margin: 4px 0 12px; background: var(--tile); border-radius: var(--r); overflow: hidden; }
+.gets div { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 16px; padding: 10px 16px; border-top: 1px solid var(--line); }
+.gets div:first-child { border-top: 0; }
+.gets dt code { color: var(--accent-ink); font-size: 13px; }
+.gets dd { margin: 0; color: var(--muted); font-size: 14.5px; }
+@media (max-width: 1000px) { .gets div { grid-template-columns: 1fr; gap: 2px; } }
+
+.dlinks { background: var(--violet-1); border-radius: var(--r); padding: 12px 16px; font-size: 15px; color: var(--ink) !important; }

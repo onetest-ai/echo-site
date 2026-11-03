@@ -7,7 +7,9 @@ Colours and type are shared with the Echo window (`crates/echoctl/ui/app.css` in
 
 - `index.html` + `assets/home.css` + `assets/home.js`: home page
 - `privacy/`: privacy policy
-- `code-signing/`: code signing policy (SignPath Foundation)
+- `extend/` + `assets/extend.css`: how to write Echo plugins (the home page's look); `extend/index.md` is the same as Markdown (`python3 tools/html2md.py` after an edit), `extend/echo-plugin.d.ts` the types of `ctx`; screenshots in `assets/screens/extend/` (`tools/screens/extend.sh` makes the demo they are shot from)
+- `llms.txt`: what's here, for agents
+- `windows/`: how the Windows builds are made and checked (not code-signed yet); `code-signing/` forwards there
 - `trademark/`: trademark notice
 - `assets/site.css`: styles for the policy pages
 - `assets/brand/`: the onetest logo, favicon, social preview image

@@ -253,6 +253,17 @@ html:not(.js) .shot:first-child { opacity: 1; }
 .facts div { background: var(--tile); border-radius: var(--r); padding: 20px; }
 .facts dt { color: var(--muted); font-size: var(--t1); }
 .facts dd { margin: 4px 0 0; font-size: var(--t3); font-weight: 650; letter-spacing: -0.01em; }
+/* Plugins: what they add, and where to start writing one */
+.extend { max-width: 1440px; margin: 0 auto; padding: 120px var(--m) 0; display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 48px; align-items: start; }
+.extend h2 { font-size: var(--t4); letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 20px; }
+.extend p { font-size: var(--t3); line-height: 1.4; max-width: 30em; }
+.extend p + p { margin-top: 16px; font-size: var(--t2); }
+.extend a { color: var(--accent-ink); font-weight: 600; }
+.plugs { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.plugs li { background: var(--tile); border-radius: var(--r); padding: 20px; display: grid; gap: 4px; }
+.plugs b { font-size: var(--t3); font-weight: 650; letter-spacing: -0.01em; }
+.plugs span { color: var(--muted); font-size: var(--t1); line-height: 1.5; }
+@media (max-width: 900px) { .extend { grid-template-columns: 1fr; padding: 96px var(--m) 0; } }
 @media (max-width: 900px) { .private { grid-template-columns: 1fr; padding: 96px var(--m); } }
 
 /* ── get ── */

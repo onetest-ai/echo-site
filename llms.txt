@@ -1,0 +1,20 @@
+# Echo by onetest
+
+> Echo records the Teams calls you choose, transcribes them on your computer, and — through Claude Code on your own account — writes minutes, keeps a work board per client and answers questions across calls, chats, mail and files. A menu bar / tray app for macOS and Windows with its own window, the `echoctl` command line and a Claude Code plugin. Plugins extend it with their own code.
+
+## Extending Echo
+
+- [Extend Echo (Markdown)](https://echo.onetest.ai/extend/index.md): the plugin documentation — what a plugin is, a quick start, the manifest, the host API (`ctx` in main.js), every place a plugin shows up in the window (slots, panels, Settings pages, ⌘K actions, activities with graphs, Inbox items) with what each receives, marketplaces, the security model and the command line.
+- [echo-plugin.d.ts](https://echo.onetest.ai/extend/echo-plugin.d.ts): TypeScript types for the manifest, `HostContext`, `ClientContext`, the slot targets (`calendar.event`, `call.menu`, `task.actions`), Inbox items and Claude Code runs.
+- [Echo's own plugins](https://github.com/onetest-ai/echo-plugins): Scheduler, Telegram and Obsidian — working examples, and the built-in marketplace.
+
+## Echo
+
+- [Home](https://echo.onetest.ai/): what Echo does, from call to answer.
+- [Source](https://github.com/onetest-ai/echo): the app (Rust), its window and the Claude Code plugin.
+- [Releases](https://github.com/onetest-ai/echo/releases/latest): macOS (signed, notarized) and Windows builds.
+
+## Optional
+
+- [Privacy policy](https://echo.onetest.ai/privacy/): no Echo servers, no telemetry; call text goes only to the AI the user chooses.
+- [Windows builds](https://echo.onetest.ai/windows/): how they are built and checked; not code-signed yet.
