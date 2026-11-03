@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Extend Echo · plugins · Echo by onetest</title>
+<meta name="description" content="Write plugins for Echo: a host half that runs in the app, a client half that draws in the window, shared through a marketplace.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6f6f8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141418" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/assets/brand/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
+<meta property="og:title" content="Extend Echo with plugins">
+<meta property="og:description" content="A manifest and two JavaScript files: your own features in Echo and its window.">
+<meta property="og:image" content="https://echo.onetest.ai/assets/brand/og.png">
+<link rel="alternate" type="text/markdown" href="/extend/index.md" title="Extend Echo (Markdown)">
+<link rel="stylesheet" href="/assets/home.css">
+<link rel="stylesheet" href="/assets/extend.css?v=9">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="bar">
+  <a class="brand" href="/"><img src="/assets/brand/onetest-logo-128.png" alt="" width="28" height="28">Echo</a>
+  <nav aria-label="Main">
+    <a href="/#tour">From call to answer</a>
+    <a href="/extend/" aria-current="page">Plugins</a>
+    <a href="/#changed">What changed</a>
+    <a href="/privacy/">Privacy</a>
+    <a class="btn small" href="https://github.com/onetest-ai/echo/releases/latest">Download</a>
+  </nav>
+</header>
+
+<main id="main">
+<section class="hero x-hero" aria-labelledby="title">
+  <div class="hero-text">
+    <h1 id="title">Make Echo yours.</h1>
+    <div class="hero-side">
+      <p>A plugin is a folder with a manifest and two JavaScript files: a host half that runs inside Echo and a client half that draws in its window. People install it from a marketplace, after a sheet tells them what it may touch.</p>
+      <p class="hero-act"><a class="btn" href="#quickstart">Start with the quick start</a><a href="https://github.com/onetest-ai/echo-plugins">See ours on GitHub</a></p>
+    </div>
+  </div>
+  <div class="halves">
+    <div class="half"><small>Host half · main.js</small><b>Runs inside Echo</b><p>One sandbox per plugin. Commands, timers, its own files and settings, HTTPS, Claude Code on your profiles, the Inbox, sending to you.</p></div>
+    <div class="half"><small>Client half · client.js</small><b>Draws in the window</b><p>A Settings section, panels, buttons in Echo's slots, palette actions, an activity of its own — in Echo's own look, light and dark.</p></div>
+  </div>
+</section>
+<section class="docs" id="docs" aria-label="Documentation">
+  <nav class="dtoc" aria-label="Documentation"><p>Documentation</p><a href="#overview">Overview</a><a href="#quickstart">Quick start</a><a href="#manifest">The manifest</a><a href="#host">Host API</a><a href="#client">Where it shows up</a><a href="#market">Marketplaces</a><a href="#security">Security model</a><a href="#cli">Command line</a><a href="#examples">Examples</a></nav>
+  <article class="dart">
+
+  <h2 id="overview">Overview</h2>
+  <p>An Echo plugin adds a feature with its own code. It is a folder with a manifest, <code>echo-plugin.json</code>, and up to two JavaScript modules. The <b>host half</b> runs inside Echo, in a sandbox of its own (QuickJS, 64 MB, 5 seconds of JavaScript at a time; long work is async). The <b>client half</b> runs in the Echo window. Both export <code>apply(ctx)</code>; <code>ctx</code> is the only way to Echo.</p>
+  <p>Echo loads enabled plugins when it starts and again after an install, an update, a switch or a removal. Switched off, a plugin's settings section, panels, buttons, timers and skills are gone; its files stay in its own folder until it is removed.</p>
+  <p class="dlinks"><a href="/extend/echo-plugin.d.ts">echo-plugin.d.ts</a> — the types of <code>ctx</code>, the manifest and every <code>target</code>, for your editor and for agents · <a href="/extend/index.md">This page as Markdown</a></p>
+  <div class="where">
+    <div><small>Its code</small><code>&lt;config&gt;/plugins/installed/&lt;id&gt;/&lt;version&gt;/</code></div>
+    <div><small>Its files and settings</small><code>&lt;data folder&gt;/.echo/plugins/&lt;id&gt;/</code></div>
+    <div><small>Its secrets</small><code>&lt;config&gt;/plugins/secrets/&lt;id&gt;.json</code></div>
+  </div>
+
+  <h2 id="quickstart">Quick start</h2>
+  <p>Standup: yesterday's calls as three bullets, on its own Settings page. Six steps, about ten minutes.</p>
+  <ol class="qs">
+    <li class="qs-step" id="qs-folder">
+      <div class="step-t"><span class="qs-n">1</span><h3>Make the folder</h3><p>A plugin is a folder. Put it in a marketplace folder of your own — a Git repository later, a plain folder while you write it.</p></div>
+      <figure class="file"><pre><code>my-plugins/
+├── echo-marketplace.json
+└── plugins/
+    └── standup/
+        ├── echo-plugin.json
+        ├── main.js
+        └── client.js</code></pre></figure>
+    </li><li class="qs-step" id="qs-manifest">
+      <div class="step-t"><span class="qs-n">2</span><h3>Write the manifest</h3><p><code>echo-plugin.json</code> names it, the Echo it needs, its two halves and its settings. <code>uses</code> says what it may touch: each entry becomes a line of the install sheet.</p></div>
+      <figure class="file"><figcaption>echo-plugin.json</figcaption><pre><code>{
+  &quot;id&quot;: &quot;standup&quot;,
+  &quot;name&quot;: &quot;Standup&quot;,
+  &quot;version&quot;: &quot;0.1.0&quot;,
+  &quot;echo&quot;: &quot;&gt;=0.7.4&quot;,
+  &quot;summary&quot;: &quot;Yesterday&#x27;s calls as a three-line standup&quot;,
+  &quot;uses&quot;: { &quot;claude&quot;: {} },
+  &quot;main&quot;: &quot;main.js&quot;,
+  &quot;client&quot;: &quot;client.js&quot;,
+  &quot;settings&quot;: [
+    { &quot;key&quot;: &quot;team&quot;, &quot;label&quot;: &quot;Team name&quot;, &quot;type&quot;: &quot;string&quot; }
+  ]
+}</code></pre></figure>
+    </li><li class="qs-step" id="qs-host">
+      <div class="step-t"><span class="qs-n">3</span><h3>The host half</h3><p><code>main.js</code> runs inside Echo. Here a command asks Claude Code, on the user's own AI profile and read-only, for a standup from yesterday's calls, and keeps the answer in the plugin's own folder, and returns it as HTML.</p></div>
+      <figure class="file"><figcaption>main.js</figcaption><pre><code>export function apply(ctx) {
+  ctx.command(&#x27;standup&#x27;, async () =&gt; {
+    const team = (await ctx.settings.get(&#x27;team&#x27;)) || &#x27;my team&#x27;
+    const { answer } = await ctx.claude.run({
+      title: &#x27;Standup&#x27;,
+      tools: &#x27;read&#x27;,
+      prompt: `From my calls since yesterday, write ${team}&#x27;s standup in three bullets.`,
+    })
+    await ctx.store.write(&#x27;last.md&#x27;, answer)
+    return { html: ctx.markdown(answer) }   // Echo&#x27;s safe Markdown writer
+  })
+}</code></pre></figure>
+    </li><li class="qs-step" id="qs-client">
+      <div class="step-t"><span class="qs-n">4</span><h3>The client half</h3><p><code>client.js</code> runs in the Echo window: a section of its own in Settings, a button, and the answer the host half turned into safe HTML with <code>ctx.markdown</code>.</p></div>
+      <figure class="file"><figcaption>client.js</figcaption><pre><code>export function apply(ctx) {
+  let text = &#x27;&#x27;
+  ctx.settings.section({
+    id: &#x27;main&#x27;,
+    label: &#x27;Standup&#x27;,
+    render: () =&gt; `&lt;h2&gt;Standup&lt;/h2&gt;
+      &lt;button class=&quot;btn primary&quot; data-standup&gt;Write it&lt;/button&gt;
+      &lt;div&gt;${text}&lt;/div&gt;`,
+  })
+  ctx.listen(&#x27;click&#x27;, async (e) =&gt; {
+    if (!e.target.closest(&#x27;[data-standup]&#x27;)) return
+    const r = await ctx.call(&#x27;standup&#x27;)
+    text = r.html
+    ctx.render()
+  })
+}</code></pre></figure>
+    </li><li class="qs-step" id="qs-market">
+      <div class="step-t"><span class="qs-n">5</span><h3>List it</h3><p><code>echo-marketplace.json</code> at the marketplace's root lists its plugins. Push the folder to GitHub to share it: people add <code>owner/repo</code>.</p></div>
+      <figure class="file"><figcaption>my-plugins/echo-marketplace.json</figcaption><pre><code>{
+  &quot;name&quot;: &quot;acme&quot;,
+  &quot;owner&quot;: &quot;acme-example&quot;,
+  &quot;featured&quot;: [&quot;standup&quot;],
+  &quot;plugins&quot;: [
+    { &quot;id&quot;: &quot;standup&quot;, &quot;source&quot;: &quot;./plugins/standup&quot;,
+      &quot;categories&quot;: [&quot;automation&quot;] }
+  ]
+}</code></pre></figure>
+    </li><li class="qs-step" id="qs-install">
+      <div class="step-t"><span class="qs-n">6</span><h3>Install it</h3><p>In Echo: Settings → Plugins → Marketplaces → Add → the <code>my-plugins</code> folder. Then Discover → Standup → Install. A folder is read where it is: after an edit, Read again.</p></div>
+      <figure class="file"><pre><code># Or from a terminal:
+echoctl plugin marketplace add ~/my-plugins
+echoctl plugin install standup      # shows what it uses; --yes agrees
+echoctl plugin call standup standup</code></pre></figure>
+    </li>
+  </ol>
+
+  <h2 id="manifest">The manifest</h2>
+  <p><code>echo-plugin.json</code> at the root of the plugin's folder. Echo reads it before anything runs, and the install sheet is made from it.</p>
+  <div class="fields"><div class="f"><div><code>id</code><small>string, required</small></div><p>Lowercase letters, digits and dashes. The plugin's folder names, its settings and its routes use it, so it never changes.</p></div><div class="f"><div><code>name</code><small>string, required</small></div><p>What people see on its card, in Settings and on the install sheet.</p></div><div class="f"><div><code>version</code><small>string, required</small></div><p>A plain version (<code>1.2.0</code>). When its marketplace offers a newer one, Settings → Plugins shows Update.</p></div><div class="f"><div><code>echo</code><small>string</small></div><p>The Echo it needs: <code>"&gt;=0.7.4"</code>. An older Echo shows "Needs a newer Echo" instead of Install.</p></div><div class="f"><div><code>summary</code><small>string</small></div><p>One line for its card in Discover.</p></div><div class="f"><div><code>uses</code><small>object</small></div><p>What it may touch: <code>claude</code>, <code>schedule</code>, <code>deliver</code>, <code>deliver_provider</code>, <code>network</code>, <code>folders</code>, <code>sessions</code>, <code>channel</code>, <code>echo</code>. Each is described with the functions it opens in the <a href="#host">Host API</a>.</p></div><div class="f"><div><code>main</code><small>path</small></div><p>Its host half, an ES module in the plugin's folder. Leave it out for a plugin that only draws.</p></div><div class="f"><div><code>client</code><small>path</small></div><p>Its client half, an ES module loaded into the window. Leave it out for a plugin that only works in the background.</p></div><div class="f"><div><code>settings</code><small>array</small></div><p>Values the user sets in its card: <code>{key, label, type, help}</code> with type <code>string</code>, <code>bool</code>, <code>folder</code> or <code>secret</code>. Secrets are stored apart and never shown again.</p></div></div>
+
+  <h2 id="host">Host API</h2>
+  <p>What <code>ctx</code> holds in <code>main.js</code>. Every call that waits — Claude Code, HTTPS, the folder picker, reading many files — returns a promise and runs outside the plugin's time slice.</p>
+  <p>Some groups need a capability: a key in the manifest's <code>uses</code>. Each one becomes a sentence on the install sheet, shown under its group; a function that needs one refuses without it, and an update that asks for more waits until the user agrees again.</p>
+  <h3>Commands and timers</h3>
+<div class="capline"><code>&quot;uses&quot;: { &quot;schedule&quot;: {} }</code><span>Install sheet: “Works on its own on a schedule while Echo runs”</span></div><p class="capnote">Only <code>ctx.every</code> needs it; commands need nothing.</p>
+<div class="fn"><div class="fn-h"><code>ctx.command(name, fn)</code></div><p>A command others can run: the plugin's client half (<code>ctx.call</code>), an Inbox button, or <code>echoctl plugin call</code>. <code>fn</code> gets the arguments as an object, may be async, and returns anything JSON can hold.</p><pre class="code"><code>ctx.command(&#x27;summary&#x27;, async ({ days = 1 }) =&gt; {
+  return { text: `last ${days} day(s)` }
+})</code></pre></div>
+<div class="fn"><div class="fn-h"><code>ctx.every(seconds, fn)</code><span class="needs">needs <code>schedule</code></span></div><p>Runs <code>fn</code> every so many seconds (at least 10) while Echo runs. Command-line calls never start timers.</p></div>
+<div class="fn"><div class="fn-h"><code>ctx.on(event, fn)</code></div><p>Reserved: Echo raises no events to plugins yet. Use a timer (<code>ctx.every</code>) or a command meanwhile.</p></div>
+<h3>Its own files and settings</h3>
+<div class="fn"><div class="fn-h"><code>ctx.store.read(path) · write(path, text) · list(dir) · remove(path) · path(path)</code></div><p>Text files in the plugin's own folder inside the user's data folder. Paths are relative and stay inside it.</p></div>
+<div class="fn"><div class="fn-h"><code>ctx.settings.get(key) · set(key, value)</code></div><p>The values of its manifest's <code>settings</code>. A <code>secret</code> is kept in a file only the user can read and is never sent to the window. <code>store.read</code> of a missing file gives <code>null</code>.</p></div>
+<div class="fn"><div class="fn-h"><code>ctx.package.read(path) · list(dir)</code></div><p>Its own installed files, read-only — templates, prompts, defaults it ships.</p></div>
+<h3>Network</h3>
+<div class="capline"><code>&quot;uses&quot;: { &quot;network&quot;: { &quot;hosts&quot;: [&quot;api.example.com&quot;] } }</code><span>Install sheet: “Talks to api.example.com over HTTPS”</span></div>
+<div class="fn"><div class="fn-h"><code>ctx.http.fetch(url, { method, headers, body })</code><span class="needs">needs <code>network</code></span></div><p>HTTPS to the hosts its manifest names; anything else is refused. Methods GET, POST, PUT, PATCH, DELETE; a 60-second limit and 10 MB per answer. Returns <code>{status, body}</code>.</p><pre class="code"><code>const r = await ctx.http.fetch(&#x27;https://api.example.com/v1/items&#x27;, {
+  method: &#x27;POST&#x27;,
+  headers: { &#x27;Content-Type&#x27;: &#x27;application/json&#x27; },
+  body: { name: &#x27;x&#x27; },
+})</code></pre></div>
+<h3>Claude Code</h3>
+<div class="capline"><code>&quot;uses&quot;: { &quot;claude&quot;: {} }</code><span>Install sheet: “Runs Claude Code on your AI profiles, with the permissions you pick”</span></div>
+<div class="fn"><div class="fn-h"><code>ctx.claude.run({ prompt, title, profile, model, tools, dir, timeout })</code><span class="needs">needs <code>claude</code></span></div><p>Runs Claude Code headless on one of the user's AI profiles (the default when <code>profile</code> is left out) and returns <code>{answer, model, usage}</code> — <code>usage</code> holds tokens, cost and time. <code>tools</code> decides what it may do: <code>"none"</code>; <code>"read"</code> — the data folder, Echo's read-only commands and the Brain; <code>"folder"</code> — the user's own Claude Code settings, refusing anything that would ask; <code>"skip"</code> — everything, unattended. <code>timeout</code> is in minutes (1–60, default 20); <code>dir</code> is its working folder inside the plugin's store (default <code>runs/&lt;time&gt;</code>). Echo adds the date and how to reach its data to the prompt.</p><pre class="code"><code>const { answer, usage } = await ctx.claude.run({
+  title: &#x27;Weekly digest&#x27;,
+  tools: &#x27;read&#x27;,
+  prompt: &#x27;What did my clients ask for this week?&#x27;,
+})</code></pre></div>
+<div class="fn"><div class="fn-h"><code>ctx.claude.hasPlugin(spec, profile) · installPlugin(spec, profile)</code></div><p>Whether a Claude Code plugin (<code>name@marketplace</code>) is installed for a profile, and installing it at that profile's user scope.</p></div>
+<div class="fn"><div class="fn-h"><code>ctx.profiles()</code></div><p>The user's AI profiles: <code>{default, profiles: [{id, name}]}</code>.</p></div>
+<h3>Talking to the user</h3>
+<div class="capline"><code>&quot;uses&quot;: { &quot;deliver&quot;: { &quot;to&quot;: [&quot;teams&quot;, &quot;mail&quot;] } }</code><span>Install sheet: “Sends messages to you: Teams (your chat with yourself) and mail”</span></div><div class="capline"><code>&quot;uses&quot;: { &quot;deliver_provider&quot;: { &quot;kinds&quot;: [&quot;telegram&quot;] } }</code><span>Install sheet: “Adds a way Echo sends things to you: Telegram”</span></div><p class="capnote">Notifications, the Inbox and Markdown need nothing. Messages go only to the user — never to an address a model picked.</p>
+<div class="fn"><div class="fn-h"><code>ctx.notify(title, body)</code></div><p>A system notification from Echo.</p></div>
+<div class="fn"><div class="fn-h"><code>ctx.inbox.set(key, item) · clear(key)</code></div><p>An item in Echo's Inbox until it is cleared: <code>{title, why, go, actions: [{label, command, args, primary}]}</code>. Each action runs one of the plugin's commands; <code>go</code> is where a click on the item leads.</p><pre class="code"><code>ctx.inbox.set(&#x27;failed-42&#x27;, {
+  title: &#x27;Routine failed: Monday digest&#x27;,
+  why: &#x27;The AI profile needs a sign-in&#x27;,
+  actions: [{ label: &#x27;Run again&#x27;, command: &#x27;run&#x27;, args: { id: 42 }, primary: true }],
+})</code></pre></div>
+<div class="fn"><div class="fn-h"><code>ctx.deliver.status() · send(kind, msg)</code><span class="needs">needs <code>deliver</code></span></div><p>The ways Echo can send to the user, and sending: <code>msg</code> is <code>{title, markdown}</code>; Echo marks anything a model wrote.</p></div>
+<div class="fn"><div class="fn-h"><code>ctx.deliver.provide(kind, { label, send }) · ready(kind, yes, why)</code><span class="needs">needs <code>deliver_provider</code></span></div><p>Become a way to send: Echo calls <code>send(msg)</code> for messages of that kind; <code>ready</code> says whether it can send now, and why not.</p></div>
+<div class="fn"><div class="fn-h"><code>ctx.markdown(md)</code></div><p>Echo's safe Markdown writer: HTML with everything escaped, https links only.</p></div>
+<h3>Folders the user picks</h3>
+<div class="capline"><code>&quot;uses&quot;: { &quot;folders&quot;: { &quot;what&quot;: &quot;Obsidian vaults&quot; } }</code><span>Install sheet: “Reads the Obsidian vaults you pick, on this computer — only those”</span></div><p class="capnote">Read-only: there is no write access to the user's folders.</p>
+<div class="fn"><div class="fn-h"><code>ctx.system.pickFolder(prompt)</code><span class="needs">needs <code>folders</code></span></div><p>The system's folder picker. The folder picked is granted to this plugin (and listed in its card); returns its path, or <code>null</code>.</p></div>
+<div class="fn"><div class="fn-h"><code>ctx.fs.folders() · list · read · readMany · walk · forget</code><span class="needs">needs <code>folders</code></span></div><p>Read-only access inside the granted folders: <code>list(root, path)</code>, <code>read(root, path, max)</code>, <code>readMany(root, paths, max)</code>, <code>walk(root, {path, ext, hidden, max})</code>, <code>forget(root)</code>. Paths are relative to a granted root; links are never followed out of it. <code>readMany</code> and <code>walk</code> run outside the plugin's time slice, for big folders.</p><pre class="code"><code>const [root] = await ctx.fs.folders()
+const files = await ctx.fs.walk(root, { ext: [&#x27;md&#x27;] })
+const texts = await ctx.fs.readMany(root, files.map((f) =&gt; f.path))</code></pre></div>
+<h3>Echo's Claude sessions</h3>
+<div class="capline"><code>&quot;uses&quot;: { &quot;sessions&quot;: { &quot;skills&quot;: true, &quot;read&quot;: true, &quot;hints&quot;: true } }</code><span>Install sheet: “Gives Claude in Echo skills of its own; lets it read the folders you give it; tells it about the client or thread open in the window”</span></div><div class="capline"><code>&quot;uses&quot;: { &quot;channel&quot;: { &quot;plugin&quot;: &quot;telegram@claude-plugins-official&quot; } }</code><span>Install sheet: “Lets you reach your Claude · Echo folder session through Telegram”</span></div><p class="capnote">Each part of <code>sessions</code> is asked for on its own, and all of it reaches only Echo's own sessions — never the user's Claude Code.</p>
+<div class="fn"><div class="fn-h"><code>ctx.sessions.skills([{ name, description, body }])</code><span class="needs">needs <code>sessions.skills</code></span></div><p>Skills for Echo's own Claude sessions — the Echo folder session and <code>claude.run</code>. Text only: Echo writes the skill files itself, so no hooks, MCP servers or agents come with them, and they never reach the user's Claude Code.</p></div>
+<div class="fn"><div class="fn-h"><code>ctx.sessions.read(folders)</code><span class="needs">needs <code>sessions.read</code></span></div><p>Which of its granted folders Echo's sessions may read.</p></div>
+<div class="fn"><div class="fn-h"><code>ctx.view.hints([{ client | thread, text }])</code><span class="needs">needs <code>sessions.hints</code></span></div><p>One plain line Claude is told when that client or thread is open in the window.</p></div>
+<div class="fn"><div class="fn-h"><code>ctx.sessions.channel({ plugin, env }) · clearChannel()</code><span class="needs">needs <code>channel</code></span></div><p>The Echo folder session listens to the Claude Code channel its manifest names.</p></div>
+<h3>Echo's data and the system</h3>
+<div class="capline"><code>&quot;uses&quot;: { &quot;echo&quot;: { &quot;read&quot;: [&quot;clients&quot;, &quot;threads&quot;] } }</code><span>Install sheet: “Reads the names of your clients and threads in Echo”</span></div>
+<div class="fn"><div class="fn-h"><code>ctx.echo.read(&quot;clients&quot; | &quot;threads&quot;)</code><span class="needs">needs <code>echo</code></span></div><p>Names and ids of the user's clients or threads, read-only.</p></div>
+<div class="fn"><div class="fn-h"><code>ctx.system.which(name)</code></div><p>Whether a program is on this computer, and where.</p></div>
+<div class="fn"><div class="fn-h"><code>ctx.log(...)</code></div><p>A line in Echo's log.</p></div>
+
+  <h2 id="client">Where a plugin shows up</h2>
+<p>The client half (<code>client.js</code>) puts a plugin into Echo's window. Each place below shows where it appears — a demo plugin put "Your button", "Your panel" and the rest there — what to call, and what Echo hands the code. Everything a plugin adds is taken out when it is switched off, updated or removed.</p>
+<p>Draw with Echo's own CSS tokens — <code>var(--accent)</code>, <code>var(--line)</code>, <code>var(--text-2)</code>, classes such as <code>btn</code>, <code>btn primary</code>, <code>set-sub</code> — and it looks like Echo in light and dark. Work that needs the host half (Claude Code, the network, files) runs through one of its commands: <code>ctx.call(command, args)</code>.</p>
+<nav class="surf-nav"><a href="#slot-calendar">Button on a meeting</a><a href="#slot-call">Item in a call&#x27;s menu</a><a href="#slot-task">Button on a task</a><a href="#panel">A panel</a><a href="#settings-section">A Settings page</a><a href="#palette">A ⌘K action</a><a href="#activity">An activity, with a graph</a><a href="#inbox">An Inbox item</a></nav>
+<h3 class="surf-group">Buttons in Echo's slots</h3>
+<p>A <b>slot</b> is a place where Echo keeps room for plugins' buttons, beside its own. <code>ctx.slots.add(slot, { label, icon, title, when, run })</code>: <code>label</code> the text, <code>icon</code> an SVG string before it, <code>title</code> the tooltip; <code>when(target)</code> decides whether it shows (left out: always), <code>run(target)</code> is the click — an error it throws is shown with the label. <code>target</code> is what the screen is about.</p>
+<section class="surf" id="slot-calendar"><h3>A button on a meeting — calendar.event</h3><p class="where-in">Calendar → a meeting → its card, under Echo's Record / Join buttons.</p><figure class="shot-x"><img src="/assets/screens/extend/slot-calendar-event.png" alt="A meeting card in the calendar with a plugin button &quot;Your button&quot; under Record when it starts" loading="lazy"></figure><pre class="code"><code>ctx.slots.add(&#x27;calendar.event&#x27;, {
+  label: &#x27;Prep brief&#x27;,
+  when: ({ event }) =&gt; !event.recorded &amp;&amp; new Date(event.start) &gt; Date.now(),
+  run: async ({ event }) =&gt; {
+    const { markdown } = await ctx.call(&#x27;brief&#x27;, { subject: event.subject, start: event.start })
+  },
+})</code></pre><dl class="gets"><div><dt><code>target</code></dt><dd><code>{ kind: "event", event }</code></dd></div><div><dt><code>event.id, subject, start, end</code></dt><dd>the meeting; times are ISO strings</dd></div><div><dt><code>event.online, join_url</code></dt><dd>a Teams meeting and its link</dd></div><div><dt><code>event.organizer, people, location</code></dt><dd>the organiser's name, how many are invited, where</dd></div><div><dt><code>event.cancelled, declined</code></dt><dd>as Outlook says</dd></div><div><dt><code>event.recorded</code></dt><dd><code>{name, status, minutes}</code> when Echo has the call, else empty</dd></div><div><dt><code>event.scheduled</code></dt><dd>Echo will record it</dd></div><div><dt><code>event.projects</code></dt><dd>the threads it belongs to</dd></div></dl></section>
+<section class="surf" id="slot-call"><h3>An item in a call&#x27;s menu — call.menu</h3><p class="where-in">A call → the ⋯ button in its header → the menu, above Delete.</p><figure class="shot-x"><img src="/assets/screens/extend/slot-call-menu.png" alt="The ⋯ menu of a call with a plugin item &quot;Your button&quot; after Ask Claude about this call" loading="lazy"></figure><pre class="code"><code>ctx.slots.add(&#x27;call.menu&#x27;, {
+  label: &#x27;Send minutes to the team&#x27;,
+  when: ({ call }) =&gt; call.status === &#x27;done&#x27;,
+  run: ({ call }) =&gt; ctx.call(&#x27;send&#x27;, { call: call.name }),
+})</code></pre><dl class="gets"><div><dt><code>target</code></dt><dd><code>{ kind: "call", call }</code></dd></div><div><dt><code>call.name</code></dt><dd>the call's folder name — how commands and the CLI name it</dd></div><div><dt><code>call.title, started_at, minutes</code></dt><dd>its title, start (ISO) and length in minutes</dd></div><div><dt><code>call.status</code></dt><dd><code>recording</code>, <code>transcribing</code>, <code>done</code>…</dd></div><div><dt><code>call.people</code></dt><dd>who was in it</dd></div><div><dt><code>call.path</code></dt><dd>its folder on disk</dd></div><div><dt><code>call.meeting</code></dt><dd>the invite: subject, attendees</dd></div></dl></section>
+<section class="surf" id="slot-task"><h3>A button on a task — task.actions</h3><p class="where-in">A thread's Work tab (or Tasks) → a story, task, decision, risk or question → its details, under its fields.</p><figure class="shot-x"><img src="/assets/screens/extend/slot-task-actions.png" alt="A task&#x27;s details in the right panel with a plugin button &quot;Your button&quot; under its fields" loading="lazy"></figure><pre class="code"><code>ctx.slots.add(&#x27;task.actions&#x27;, {
+  label: &#x27;Open a ticket&#x27;,
+  when: ({ kind }) =&gt; kind === &#x27;task&#x27;,
+  run: ({ node, project }) =&gt; ctx.call(&#x27;ticket&#x27;, { thread: project, id: node.id, title: node.title }),
+})</code></pre><dl class="gets"><div><dt><code>target</code></dt><dd><code>{ kind, node, project }</code></dd></div><div><dt><code>kind</code></dt><dd><code>story</code>, <code>task</code>, <code>decision</code>, <code>risk</code> or <code>question</code></dd></div><div><dt><code>node.id, title, state</code></dt><dd>e.g. <code>T001</code>, its title, <code>open</code> / <code>done</code>…</dd></div><div><dt><code>node.owners, due, description, links</code></dt><dd>who, when, the text, its links</dd></div><div><dt><code>node.history</code></dt><dd>what was said about it, with quotes</dd></div><div><dt><code>project</code></dt><dd>the thread's id</dd></div></dl></section>
+<section class="surf" id="panel"><h3>A panel</h3><p class="where-in">A view in the right (or bottom) panel, with its icon among Echo's own tabs; the user moves and closes it like any panel.</p><figure class="shot-x"><img src="/assets/screens/extend/panel.png" alt="The right panel showing the plugin&#x27;s &quot;Your panel&quot; tab beside Echo&#x27;s My notes, Inbox and Vocabulary" loading="lazy"></figure><pre class="code"><code>ctx.panels.add({
+  id: &#x27;standup&#x27;,
+  label: &#x27;Standup&#x27;,
+  icon: &#x27;&lt;svg …&gt;&lt;/svg&gt;&#x27;,
+  area: &#x27;right&#x27;,                 // or &#x27;bottom&#x27;
+  when: () =&gt; true,              // when it may show
+  render: () =&gt; `&lt;div style=&quot;padding:14px 16px&quot;&gt;${last}&lt;/div&gt;`,
+})
+ctx.showPanel(&#x27;standup&#x27;)         // open it, e.g. from a button</code></pre><p>Call <code>ctx.render()</code> after its data changes, and the panel draws again.</p></section>
+<section class="surf" id="settings-section"><h3>A Settings page</h3><p class="where-in">Settings → From plugins → its own entry, with an icon and a count.</p><figure class="shot-x"><img src="/assets/screens/extend/settings-section.png" alt="Settings with &quot;Your section&quot; under From plugins and its page open" loading="lazy"></figure><pre class="code"><code>ctx.settings.section({
+  id: &#x27;main&#x27;,
+  label: &#x27;Standup&#x27;,
+  icon: &#x27;&lt;svg …&gt;&lt;/svg&gt;&#x27;,
+  badge: () =&gt; routines.length,   // the count beside its name
+  render: () =&gt; `&lt;h2&gt;Standup&lt;/h2&gt;&lt;p class=&quot;set-lead&quot;&gt;…&lt;/p&gt;`,
+})</code></pre><p>Its address is <code>#settings/&lt;plugin&gt;:&lt;id&gt;</code> — <code>ctx.go('settings/standup:main')</code> opens it. The values of the manifest's <code>settings</code> get a card in Settings → Plugins on their own; <code>ctx.settings.add(card)</code> adds to that card.</p></section>
+<section class="surf" id="palette"><h3>A ⌘K action</h3><p class="where-in">The ⌘K palette (Ctrl+K on Windows), in a group of its own.</p><figure class="shot-x"><img src="/assets/screens/extend/palette.png" alt="The ⌘K palette with &quot;Your action&quot; under the plugin&#x27;s group" loading="lazy"></figure><pre class="code"><code>ctx.palette.add({
+  label: &#x27;Write a standup&#x27;,
+  group: &#x27;Standup&#x27;,
+  keywords: &#x27;daily scrum&#x27;,
+  run: (target) =&gt; ctx.call(&#x27;standup&#x27;),
+})</code></pre><dl class="gets"><div><dt><code>target</code></dt><dd>what the palette is on (the chip in its box): <code>{ kind: "call", c, label }</code> on a call, <code>{ kind: "event", e, label }</code> on a meeting, or nothing</dd></div></dl></section>
+<section class="surf" id="activity"><h3>An activity, with a graph</h3><p class="where-in">The bar on the left, under Echo's activities: a page of its own. Here it draws Echo's graph.</p><figure class="shot-x"><img src="/assets/screens/extend/activity.png" alt="A plugin activity &quot;Yours&quot; in the left bar showing a page with a graph of nodes and links" loading="lazy"></figure><pre class="code"><code>ctx.activities.add({
+  id: &#x27;map&#x27;,
+  label: &#x27;Map&#x27;,
+  icon: &#x27;&lt;svg …&gt;&lt;/svg&gt;&#x27;,
+  render: () =&gt; `&lt;div style=&quot;padding:22px 28px;height:100%&quot;&gt;
+      &lt;h2&gt;Map&lt;/h2&gt;&lt;div id=&quot;map-g&quot; style=&quot;height:520px&quot;&gt;&lt;/div&gt;&lt;/div&gt;`,
+  // after each render: draw into the page
+  after() {
+    ctx.ui.graph.draw(document.getElementById(&#x27;map-g&#x27;), &#x27;map&#x27;, () =&gt; {
+      const G = ctx.ui.newGraph()               // a graphology graph
+      G.addNode(&#x27;sso&#x27;, { label: &#x27;SSO&#x27;, size: 1.4, color: &#x27;#9b78ff&#x27;, x: 0, y: 0 })
+      G.addNode(&#x27;pilot&#x27;, { label: &#x27;Pilot&#x27;, size: 0.9, color: &#x27;#9b78ff&#x27;, x: 1, y: 1 })
+      G.addEdge(&#x27;sso&#x27;, &#x27;pilot&#x27;, { size: 1, color: &#x27;#8a8a9566&#x27; })
+      return G
+    }, { click: (id) =&gt; ctx.go(`${ctx.id}:map/${id}`) })
+  },
+})</code></pre><p>Its address is <code>#&lt;plugin&gt;:&lt;id&gt;/…</code>; what follows the id is the activity's own route (<code>ctx.where().route</code>). <code>ctx.ui.graph.draw(box, key, build, opts)</code> lays the graph out once per <code>key</code> and keeps it across renders; sizes are relative to the graph — keep them small.</p></section>
+<section class="surf" id="inbox"><h3>An Inbox item</h3><p class="where-in">Inbox (the tray at the foot of the bar, and its panel): something waiting for the user, with buttons. It comes from the <b>host</b> half.</p><figure class="shot-x"><img src="/assets/screens/extend/inbox.png" alt="The Inbox panel with &quot;Your Inbox item&quot; and its buttons Do it and Not now" loading="lazy"></figure><pre class="code"><code>// main.js
+ctx.inbox.set(&#x27;weekly-failed&#x27;, {
+  title: &#x27;Routine failed: Monday digest&#x27;,
+  why: &#x27;The AI profile needs a sign-in&#x27;,
+  go: &#x27;settings/standup:main&#x27;,              // where a click on it leads
+  actions: [
+    { label: &#x27;Run again&#x27;, command: &#x27;run&#x27;, args: { id: 42 }, primary: true },
+    { label: &#x27;Not now&#x27;, command: &#x27;snooze&#x27;, args: { id: 42 } },
+  ],
+})
+ctx.inbox.clear(&#x27;weekly-failed&#x27;)            // once it is decided</code></pre><p>Each button runs one of the plugin's commands with its <code>args</code>. Echo keeps the item until the plugin clears it.</p></section>
+<h3 class="surf-group">The rest of the client half</h3>
+<div class="fn"><div class="fn-h"><code>ctx.call(command, args)</code></div><p>Runs a command of its host half; a promise of what it returned.</p></div>
+<div class="fn"><div class="fn-h"><code>ctx.listen(type, fn) · ctx.ui.style(css)</code></div><p>Document events (clicks on its own buttons) and CSS, removed with the plugin — an update never doubles a click.</p></div>
+<div class="fn"><div class="fn-h"><code>ctx.where() · ctx.go(hash) · ctx.render()</code></div><p>Where the window is (<code>{view, section, route}</code>), going somewhere, and drawing again after its data changed.</p></div>
+<div class="fn"><div class="fn-h"><code>ctx.ui</code></div><p>Echo's helpers: <code>esc</code> (escape text for HTML), <code>style</code>, <code>notice</code> (a message in the status line), <code>relDay</code>, <code>ago</code>, <code>graph</code>, <code>newGraph</code>. Markdown is the host half's: <code>ctx.markdown</code>.</p></div>
+
+
+  <h2 id="market">Marketplaces</h2>
+  <p>A marketplace is a Git repository or a folder with <code>echo-marketplace.json</code> at its root. Users add it in Settings → Plugins → Marketplaces as <code>owner/repo</code>, <code>owner/repo@ref</code>, a Git URL (<code>…#ref</code>) or a folder on their computer. Echo's own, <a href="https://github.com/onetest-ai/echo-plugins">onetest-ai/echo-plugins</a>, is built in.</p>
+  <pre class="code"><code>{
+  &quot;name&quot;: &quot;acme&quot;,
+  &quot;owner&quot;: &quot;acme-example&quot;,
+  &quot;featured&quot;: [&quot;standup&quot;],
+  &quot;plugins&quot;: [
+    { &quot;id&quot;: &quot;standup&quot;, &quot;source&quot;: &quot;./plugins/standup&quot;, &quot;categories&quot;: [&quot;automation&quot;] },
+    { &quot;id&quot;: &quot;board&quot;, &quot;source&quot;: { &quot;github&quot;: &quot;acme-example/board&quot;, &quot;ref&quot;: &quot;v2&quot;, &quot;path&quot;: &quot;plugin&quot; } }
+  ]
+}</code></pre>
+  <ul>
+    <li>A plugin's <code>source</code> is a folder in the same repository, or another GitHub repository at a ref and path.</li>
+    <li>Echo checks every tree it fetches: no links; at most 5,000 files and 64 MB a marketplace, 400 files and 20 MB a plugin.</li>
+    <li>It reads a marketplace again after 30 minutes and right after Echo updates. A folder is read where it is — while you write a plugin, Read again shows each edit.</li>
+  </ul>
+
+  <h2 id="security">Security model</h2>
+  <ul class="sec">
+    <li><b>Installing is trusting.</b> A plugin runs its own code with the user's rights; the install sheet says so first and names who listed it.</li>
+    <li><b>Files.</b> Its own folder, and the folders the user picked for it, read-only; links are not followed out of them.</li>
+    <li><b>Network.</b> HTTPS to the hosts its manifest names, nothing else.</li>
+    <li><b>Claude Code.</b> Runs on the user's AI profiles with the tools the plugin asks for per run; a read-only run can't change anything.</li>
+    <li><b>The user's Claude Code is never touched.</b> Skills and folders go only to Echo's own sessions.</li>
+    <li><b>Secrets</b> are kept apart, readable only by the user, and never reach the window. Removing a plugin deletes its grants, hints and skills.</li>
+  </ul>
+
+  <h2 id="cli">Command line</h2>
+  <pre class="code"><code>echoctl plugin list                          # installed, offered, updates
+echoctl plugin marketplace add &lt;owner/repo | URL | folder&gt;
+echoctl plugin marketplace update            # read them again
+echoctl plugin install &lt;id&gt; [--yes]          # shows what it uses; --yes agrees
+echoctl plugin update &lt;id&gt;  |  remove &lt;id&gt;  |  enable &lt;id&gt;  |  disable &lt;id&gt;
+echoctl plugin set &lt;id&gt; &lt;key&gt; &lt;value&gt;        # one of its settings
+echoctl plugin call &lt;id&gt; &lt;command&gt; [json]    # run a command of its host half</code></pre>
+
+  <h2 id="examples">Examples</h2>
+  <div class="exs">
+    <a href="https://github.com/onetest-ai/echo-plugins/tree/main/plugins/scheduler"><b>Scheduler</b><span>Prompts on a schedule, sent to Teams, mail or Telegram: every, claude.run, deliver, inbox, a Settings section.</span></a>
+    <a href="https://github.com/onetest-ai/echo-plugins/tree/main/plugins/telegram"><b>Telegram</b><span>A way Echo sends to you and a channel to Claude: deliver.provide, http, sessions.channel, a secret setting.</span></a>
+    <a href="https://github.com/onetest-ai/echo-plugins/tree/main/plugins/obsidian"><b>Obsidian</b><span>Vaults for Claude and a vault browser: folders, fs.readMany, sessions.skills, an activity with a graph.</span></a>
+  </div>
+  <p>Questions and ideas: <a href="https://github.com/onetest-ai/echo/issues">GitHub issues</a>.</p>
+  </article>
+</section>
+</main>
+<script>
+// The contents follow the reading: the last section whose heading has passed the top is marked.
+const links = [...document.querySelectorAll('.dtoc a')]
+const heads = links.map((a) => document.querySelector(a.hash)).filter(Boolean)
+const mark = () => {
+  let cur = heads[0]
+  for (const h of heads) if (h.getBoundingClientRect().top < 140) cur = h
+  links.forEach((a) => a.classList.toggle('on', cur && a.hash === '#' + cur.id))
+}
+addEventListener('scroll', mark, { passive: true })
+mark()
+</script>
+
+<footer class="foot">
+  <p class="foot-who"><img src="/assets/brand/onetest-logo-128.png" alt="" width="32" height="32">Echo is made by onetest.</p>
+  <nav aria-label="Footer"><a href="/privacy/">Privacy</a><a href="/extend/">Extend Echo</a><a href="/windows/">Windows builds</a><a href="/trademark/">Trademark</a><a href="https://github.com/onetest-ai/echo">GitHub</a></nav>
+  <!-- TODO: license line goes here once Echo's license is final (moving to AGPL-3.0 before the public launch). -->
+  <p class="foot-c">© 2026 onetest</p>
+</footer>
+
+</body>
+</html>
