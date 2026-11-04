@@ -95,7 +95,7 @@
 
   <h2 id="m365">5. Microsoft 365: calendar, chat, mail</h2>
   <p><b>Settings → Calendar &amp; chat → Account → Sign in…</b> Your browser opens your organisation's sign-in. Echo reads your calendar and meeting chats, and sends the mail you ask Claude to send, with its own sign-in.</p>
-  <p>Echo uses CodeMie's public app registration. If your IT blocks it, ask them to approve it, or to register an app for you and put its ID under <b>App registration → Change…</b> on the same page.</p>
+  <p>Echo signs in with the public app registration of <a href="https://github.com/codemie-ai/codemie-code">CodeMie Code</a>, the open-source Claude Code wrapper — the same one its <a href="https://github.com/codemie-ai/codemie-code/tree/main/src/agents/plugins/claude/plugin/skills/msgraph">Microsoft 365 skill</a> uses, so your IT may have approved it already. If your IT blocks it, ask them to approve it, or to register an app for you and put its ID under <b>App registration → Change…</b> on the same page.</p>
   <p>Mail from Claude in the Echo window always goes through Echo first, from your own account and after you say yes. Claude uses its own Microsoft 365 connector only when Echo can't send; if neither can, it opens a draft in your mail app.</p>
   <p class="dlinks"><b>Check:</b> the <b>Calendar</b> view shows today's meetings.</p>
 
