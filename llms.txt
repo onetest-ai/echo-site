@@ -11,6 +11,7 @@
 ## Echo
 
 - [Home](https://echo.onetest.ai/): what Echo does, from call to answer.
+- [Install](https://echo.onetest.ai/install/): macOS and Windows, Claude Code and its Echo plugin, Microsoft 365 — a check after each step, and troubleshooting.
 - [Source](https://github.com/onetest-ai/echo): the app (Rust), its window and the Claude Code plugin.
 - [Releases](https://github.com/onetest-ai/echo/releases/latest): macOS (signed, notarized) and Windows builds.
 

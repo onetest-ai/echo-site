@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Install Echo · Echo by onetest</title>
+<meta name="description" content="Set up Echo on macOS or Windows, with Claude Code for the minutes — a check after each step, and what to do when one fails.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="/assets/brand/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/"><img class="mark" src="/assets/brand/onetest-logo-128.png" alt="onetest" width="30" height="30">Echo <small>by onetest</small></a>
+    <nav aria-label="Main">
+      <a class="opt" href="/#tour">What it does</a>
+      <a href="/privacy/">Privacy</a>
+      <a class="btn primary small" href="https://github.com/onetest-ai/echo/releases/latest">Download <span class="tag">beta</span></a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="doc">
+  <div class="wrap">
+    <h1>Install Echo</h1>
+    <p class="meta">About 15 minutes, most of it downloads. Each step ends with a check, so you know it worked before you go on.</p>
+    <div class="summary"><p>You need a Mac with macOS 14.2 or later (Apple Silicon), or a PC with Windows 10 version 2004 or later; the new Microsoft Teams app; and, for minutes, a Claude account (Pro, Max, Team or Enterprise) with <a href="https://claude.com/claude-code">Claude Code</a>. Echo records and transcribes without Claude Code; Claude Code writes the minutes, action items and each thread's work.</p></div>
+
+    <h2>1. Install Echo</h2>
+    <h3>macOS</h3>
+    <ol>
+      <li>Download <code>Echo-&lt;version&gt;-macos-arm64.dmg</code> from <a href="https://github.com/onetest-ai/echo/releases/latest">the latest release</a>.</li>
+      <li>Open it and drag <strong>Echo</strong> onto <strong>Applications</strong>.</li>
+      <li>Open Echo from Applications. Its octopus appears in the menu bar and in the Dock.</li>
+    </ol>
+    <h3>Windows</h3>
+    <ol>
+      <li>Download <code>echo-&lt;version&gt;-windows-x64.msi</code> from <a href="https://github.com/onetest-ai/echo/releases/latest">the latest release</a>.</li>
+      <li>Run it. Windows may say it protected your PC: the installer isn't code-signed yet (<a href="/windows/">why</a>), so choose <strong>More info → Run anyway</strong>. No administrator rights are needed.</li>
+      <li>Echo starts when the installer ends. Its octopus is in the tray, behind the ^ next to the clock.</li>
+    </ol>
+    <p class="check"><b>Check:</b> the octopus is there. If the macOS menu bar is full it hides icons — click Echo in the Dock to open its window.</p>
+
+    <h2>2. First start</h2>
+    <p>Echo asks for three things the first time:</p>
+    <ol>
+      <li><strong>Where to keep your calls.</strong> Pick a folder, for example <code>~/Echo</code> (<code>Documents\Echo</code> on Windows). Everything Echo makes stays there.</li>
+      <li><strong>A speech model.</strong> Accept the suggested one. It downloads once (0.5–1.5 GB); after that speech becomes text on your computer, offline.</li>
+      <li><strong>Permissions</strong> (macOS). Allow <strong>Microphone</strong> (your voice) and <strong>System Audio Recording</strong> (the others in the call, from Teams only). <strong>Accessibility</strong> is optional: with it Echo follows your mute in Teams and knows who is speaking.</li>
+    </ol>
+    <p class="check"><b>Check:</b> menu → <strong>Open Echo…</strong> → <strong>Settings → Health</strong>. Each permission has a ✓. If one doesn't, click <strong>Ask for permissions</strong>, or <strong>Open settings</strong> beside it.</p>
+
+    <h2>3. Install Claude Code</h2>
+    <p>Skip this if <code>claude --version</code> already works in a terminal.</p>
+    <ol>
+      <li>Install it. On macOS, open <strong>Terminal</strong> and paste:
+        <pre><code>curl -fsSL https://claude.ai/install.sh | bash</code></pre>
+        On Windows, open <strong>PowerShell</strong> and paste:
+        <pre><code>irm https://claude.ai/install.ps1 | iex</code></pre>
+        Other ways (Homebrew, npm) are on <a href="https://docs.claude.com/en/docs/claude-code/setup">Claude Code's setup page</a>.</li>
+      <li><strong>Open a new terminal window</strong> (the old one doesn't see the new command) and run <code>claude</code>. Sign in with your Claude account when it asks, then type <code>/exit</code>.</li>
+    </ol>
+    <p class="check"><b>Check:</b> in Echo, <strong>Settings → Health → Claude Code</strong> shows three rows.</p>
+    <table class="wrap1">
+      <thead><tr><th>Row</th><th>A ✓ means</th><th>If not</th></tr></thead>
+      <tbody>
+        <tr><td>Claude Code</td><td>Echo found it and it starts (its version is shown).</td><td><em>Not installed</em>: do step 3 again. <em>Doesn't start</em>: reinstall it (an npm install also needs Node.js).</td></tr>
+        <tr><td>In a terminal</td><td>A new terminal finds <code>claude</code>.</td><td>Click <strong>Add to PATH</strong> (or run <code>echoctl claude path</code>), then open a new terminal. Echo itself finds Claude Code without it.</td></tr>
+        <tr><td>Echo plugin</td><td>Claude Code lists Echo's plugin where Echo's sessions run.</td><td>Step 4.</td></tr>
+      </tbody>
+    </table>
+    <p>Click <strong>Check again</strong> after fixing something. From a terminal, <code>echoctl claude</code> prints the same check.</p>
+
+    <h2>4. Connect Claude Code to Echo</h2>
+    <p><strong>Settings → General → Claude Code plugin → Connect</strong> (or the menu: <strong>Claude Code → Connect Claude Code</strong>). It installs Echo's plugin into Claude Code for Echo's data folder — the status line, <code>/echo:process-call</code>, <code>/echo:record</code> and <code>/echo:doctor</code> — and then checks that Claude Code really lists it. If it doesn't, the notification says so and what to run instead.</p>
+    <p>For every Claude Code session on this computer, not only Echo's: <code>echoctl claude connect --scope user</code>.</p>
+    <p class="check"><b>Check:</b> <strong>Settings → Health → Echo plugin</strong> has a ✓, and <strong>Settings → General → Claude Code plugin</strong> says <strong>Installed ✓</strong>.</p>
+
+    <h2>5. Microsoft 365: calendar, chat, mail</h2>
+    <p><strong>Settings → Calendar &amp; chat → Account → Sign in…</strong> Your browser opens your organisation's sign-in. Echo reads your calendar and meeting chats, and sends the mail you ask Claude to send, with its own sign-in.</p>
+    <p>Echo uses CodeMie's public app registration. If your IT blocks it, ask them to approve it, or to register an app for you and put its ID under <strong>App registration → Change…</strong> on the same page.</p>
+    <p>Mail from Claude in the Echo window always goes through Echo first, from your own account and after you say yes. Claude uses its own Microsoft 365 connector only when Echo can't send; if neither can, it opens a draft in your mail app.</p>
+    <p class="check"><b>Check:</b> the <strong>Calendar</strong> view shows today's meetings.</p>
+
+    <h2>6. Try it</h2>
+    <ol>
+      <li>Menu → <strong>Record next call</strong>, then join a Teams call — a test call with a colleague is fine. The octopus turns green, then orange while it records.</li>
+      <li>Hang up. A notification says the transcript is ready and when the minutes come: 15 minutes later, or click <strong>Write minutes</strong> on the call's Minutes tab.</li>
+      <li>Open the call: Minutes, Transcript, Actions.</li>
+    </ol>
+    <p>If the minutes fail, the Minutes tab says why, and <strong>Show log</strong> shows what Claude Code did.</p>
+
+    <h2>Optional</h2>
+    <ul>
+      <li><strong>Command line:</strong> Settings → General → Command line → <strong>Install…</strong> puts <code>echoctl</code> in your terminal (macOS asks for your password).</li>
+      <li><strong>Start at login:</strong> Settings → General (on by default).</li>
+      <li><strong>Brain:</strong> Settings → Brain → <strong>Use the Brain</strong> (off by default) indexes your calls and your threads' mail, channels and folders for search and for Claude.</li>
+    </ul>
+
+    <h2>When something doesn't work</h2>
+    <table class="wrap1">
+      <thead><tr><th>What you see</th><th>What to do</th></tr></thead>
+      <tbody>
+        <tr><td>No octopus in the menu bar</td><td>Click Echo in the Dock, or open it from Applications. A full menu bar hides icons.</td></tr>
+        <tr><td>A recording is silent</td><td>Settings → Health: <em>Microphone</em> and <em>System Audio Recording</em> need a ✓. Run <code>/echo:doctor</code> in Claude Code.</td></tr>
+        <tr><td>"Claude Code is not installed"</td><td>Step 3, then <strong>Check again</strong> in Settings → Health.</td></tr>
+        <tr><td><code>claude: command not found</code> in a terminal</td><td>Settings → Health → <strong>Add to PATH</strong> (or <code>echoctl claude path</code>), then open a new terminal.</td></tr>
+        <tr><td>Minutes say "Not logged in"</td><td>Run <code>claude</code> in a terminal and sign in again, or click <strong>Sign in…</strong> where the call shows the error.</td></tr>
+        <tr><td>Health shows <em>An older Echo plugin</em></td><td>Click <strong>Update it</strong>, then restart Claude Code.</td></tr>
+        <tr><td>Claude in the Echo window doesn't know about a call</td><td>The call was recorded on another AI profile: pick that profile in the Claude panel.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Updating and removing</h2>
+    <p>Echo checks for updates every 6 hours and offers them in its menu (<strong>Update to …</strong>). Removing Echo keeps your calls: on macOS drag Echo from Applications to the Bin; on Windows open Settings → Apps → Installed apps → Echo → Uninstall. Your calls folder stays where you put it.</p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <nav aria-label="Footer">
+      <a href="/install/">Install</a>
+      <a href="/privacy/">Privacy</a>
+      <a href="/extend/">Extend Echo</a>
+      <a href="/windows/">Windows builds</a>
+      <a href="/trademark/">Trademark</a>
+      <a href="https://github.com/onetest-ai/echo">GitHub</a>
+    </nav>
+    <span class="made"><img src="/assets/brand/onetest-logo-128.png" alt="" width="20" height="20">© 2026 onetest</span>
+  </div>
+</footer>
+</body>
+</html>
