@@ -122,6 +122,8 @@ html:not(.x-js) .step-tabs { display: none; }
 .qs .step-t { padding-top: 2px; gap: 8px; }
 .qs .step-t h3 { margin: 0; }
 .qs .file { margin: 0; }
+.qs-step.solo { grid-template-columns: minmax(0, 1fr); }
+.qs-step.solo .step-t p { max-width: 72ch; }
 @media (max-width: 1000px) { .qs-step { grid-template-columns: 1fr; gap: 14px; } }
 
 /* a capability under its Host API group: the manifest's key and the install sheet's words */
