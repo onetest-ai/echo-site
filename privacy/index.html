@@ -6,102 +6,88 @@
 <title>Privacy · Echo by onetest</title>
 <meta name="description" content="What Echo records, where it is stored, and what is sent where.">
 <meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6f6f8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141418" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/assets/brand/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/site.css">
+<meta property="og:image" content="https://echo.onetest.ai/assets/brand/og.png">
+<link rel="stylesheet" href="/assets/home.css">
+<link rel="stylesheet" href="/assets/extend.css?v=10">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<header class="top">
-  <div class="wrap">
-    <a class="brand" href="/"><img class="mark" src="/assets/brand/onetest-logo-128.png" alt="onetest" width="30" height="30">Echo <small>by onetest</small></a>
-    <nav aria-label="Main">
-      <a class="opt" href="/#tour">What it does</a>
-      <a href="/privacy/" aria-current="page">Privacy</a>
-      <a class="btn primary small" href="https://github.com/onetest-ai/echo/releases/latest">Download <span class="tag">beta</span></a>
-    </nav>
-  </div>
+
+<header class="bar">
+  <a class="brand" href="/"><img src="/assets/brand/onetest-logo-128.png" alt="" width="28" height="28">Echo</a>
+  <nav aria-label="Main">
+    <a href="/#tour">From call to answer</a>
+    <a href="/install/">Install</a>
+    <a href="/extend/">Plugins</a>
+    <a href="/privacy/" aria-current="page">Privacy</a>
+    <a class="btn small" href="https://github.com/onetest-ai/echo/releases/latest">Download</a>
+  </nav>
 </header>
 
-<main id="main" class="doc">
-  <div class="wrap">
-    <h1>Privacy</h1>
-    <p class="meta">Applies to the Echo desktop app for macOS and Windows. Last updated 2 November 2026.</p>
-
-    <div class="summary">
+<main id="main">
+<section class="hero x-hero" aria-labelledby="title">
+  <div class="hero-text">
+    <h1 id="title">Privacy</h1>
+    <div class="hero-side">
       <p>Echo has no servers of ours and collects no telemetry or analytics. Your recordings, transcripts and notes stay on your computer. Apart from an update check with GitHub, data leaves your computer only for services you set up yourself. All of them are listed below.</p>
+      <p class="hero-act"><span>Applies to the Echo desktop app for macOS and Windows. Last updated 2 November 2026.</span></p>
     </div>
+</section>
+<section class="docs" id="docs" aria-label="Privacy">
+  <nav class="dtoc" aria-label="Privacy"><p>Privacy</p><a href="#records">What Echo records</a><a href="#transcription">Transcription</a><a href="#sent">What is sent, and where</a><a href="#stored">Other things stored</a><a href="#others">Recording other people</a><a href="#questions">Questions</a></nav>
+  <article class="dart">
 
-    <h2>What Echo records</h2>
+  <h2 id="records">What Echo records</h2>
     <ul>
-      <li>Echo records <strong>only the calls you start recording</strong>. It never records a call on its own. You start each recording yourself, from the app, its window, the command line, or a calendar meeting you've set to record.</li>
+      <li>Echo records <b>only the calls you start recording</b>. It never records a call on its own. You start each recording yourself, from the app, its window, the command line, or a calendar meeting you've set to record.</li>
       <li>A recording has two tracks: your microphone and the call's audio.</li>
-      <li>The audio stays on your computer and is <strong>deleted once it has been transcribed</strong>, unless you turn on keeping audio.</li>
+      <li>The audio stays on your computer and is <b>deleted once it has been transcribed</b>, unless you turn on keeping audio.</li>
       <li>Transcripts, minutes and your notes are ordinary files in a folder you choose. To delete them, delete the files. Uninstalling Echo does not delete this folder.</li>
     </ul>
 
-    <h2>Transcription</h2>
-    <p>Speech is turned into text <strong>on your computer</strong> (whisper.cpp or NVIDIA Nemotron), or on a transcription server <strong>you</strong> connect Echo to. Echo never sends audio to a cloud speech service by default.</p>
+  <h2 id="transcription">Transcription</h2>
+    <p>Speech is turned into text <b>on your computer</b> (whisper.cpp or NVIDIA Nemotron), or on a transcription server <b>you</b> connect Echo to. Echo never sends audio to a cloud speech service by default.</p>
 
-    <h2>What is sent, and where</h2>
+  <h2 id="sent">What is sent, and where</h2>
     <p>Echo talks to the services below, and only the ones you turn on. Each one is reached directly from your computer. Nothing goes through onetest.</p>
-    <table>
-      <thead><tr><th>Service</th><th>When</th><th>What is sent</th></tr></thead>
-      <tbody>
-        <tr>
-          <td>Your AI for minutes and live notes</td>
-          <td>When minutes or live notes are written for a call you recorded</td>
-          <td>The call's transcript, your notes and the meeting's details go to the AI you set up. That is either Claude, through your own Claude Code / Claude account (Anthropic), or a local model such as Ollama on your computer. The provider's own terms apply, for example <a href="https://www.anthropic.com/legal/privacy">Anthropic's privacy policy</a>.</td>
-        </tr>
-        <tr>
-          <td>Microsoft 365 <span class="opt-note">optional</span></td>
-          <td>Only if you sign in, which happens in your browser</td>
-          <td>Read-only access to your calendar, the meeting's Teams chat, and people's directory details (names, titles). If the Brain is on, also the Teams channels and mail you choose. Requests go straight from your computer to Microsoft Graph. Sign-in tokens are stored on your computer. <a href="https://privacy.microsoft.com/privacystatement">Microsoft's privacy statement</a> applies.</td>
-        </tr>
-        <tr>
-          <td>The Brain's embeddings <span class="opt-note">optional, off by default</span></td>
-          <td>If the Brain is on and you set an embedding endpoint</td>
-          <td>Text from your calls and chosen sources goes only to the endpoint you configure, for example Ollama on your computer. Without one, the Brain searches by words only, and nothing is sent.</td>
-        </tr>
-        <tr>
-          <td>Your transcription server <span class="opt-note">optional</span></td>
-          <td>If you connect Echo to one</td>
-          <td>The call's audio, to the server you named.</td>
-        </tr>
-        <tr>
-          <td>GitHub</td>
-          <td>Update check</td>
-          <td>Echo asks GitHub for the latest release of Echo. Nothing about you or your calls is included. <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub's privacy statement</a> applies.</td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="fields"><div class="f"><div><b>Your AI for minutes and live notes</b><small>When minutes or live notes are written for a call you recorded</small></div><p>The call's transcript, your notes and the meeting's details go to the AI you set up. That is either Claude, through your own Claude Code / Claude account (Anthropic), or a local model such as Ollama on your computer. The provider's own terms apply, for example <a href="https://www.anthropic.com/legal/privacy">Anthropic's privacy policy</a>.</p></div><div class="f"><div><b>Microsoft 365 <small>optional</small></b><small>Only if you sign in, which happens in your browser</small></div><p>Read-only access to your calendar, the meeting's Teams chat, and people's directory details (names, titles). If the Brain is on, also the Teams channels and mail you choose. Requests go straight from your computer to Microsoft Graph. Sign-in tokens are stored on your computer. <a href="https://privacy.microsoft.com/privacystatement">Microsoft's privacy statement</a> applies.</p></div><div class="f"><div><b>The Brain's embeddings <small>optional, off by default</small></b><small>If the Brain is on and you set an embedding endpoint</small></div><p>Text from your calls and chosen sources goes only to the endpoint you configure, for example Ollama on your computer. Without one, the Brain searches by words only, and nothing is sent.</p></div><div class="f"><div><b>Your transcription server <small>optional</small></b><small>If you connect Echo to one</small></div><p>The call's audio, to the server you named.</p></div><div class="f"><div><b>GitHub</b><small>Update check</small></div><p>Echo asks GitHub for the latest release of Echo. Nothing about you or your calls is included. <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub's privacy statement</a> applies.</p></div></div>
 
-    <h2>Other things stored with a call</h2>
+  <h2 id="stored">Other things stored with a call</h2>
     <ul>
-      <li><strong>Screenshots of shared screens</strong> (optional, off by default): when on, Echo captures slides and screens shared in the call so they can go into the minutes. They are stored on your computer with the call.</li>
-      <li><strong>Speaker names</strong>: Echo reads the Teams window to tell who is speaking. What it reads is stored on your computer with the call.</li>
+      <li><b>Screenshots of shared screens</b> (optional, off by default): when on, Echo captures slides and screens shared in the call so they can go into the minutes. They are stored on your computer with the call.</li>
+      <li><b>Speaker names</b>: Echo reads the Teams window to tell who is speaking. What it reads is stored on your computer with the call.</li>
     </ul>
 
-    <h2>Recording other people</h2>
+  <h2 id="others">Recording other people</h2>
     <p>Many places require the consent of everyone on a call before it is recorded. Telling participants and getting their consent is your responsibility. Echo records only when you tell it to.</p>
 
-    <h2>Questions</h2>
+  <h2 id="questions">Questions</h2>
     <p>Ask in the project's <a href="https://github.com/onetest-ai/echo/issues">GitHub issues</a>.</p>
-  </div>
+  </article>
+</section>
 </main>
+<script>
+// The contents follow the reading: the last section whose heading has passed the top is marked.
+const links = [...document.querySelectorAll('.dtoc a')]
+const heads = links.map((a) => document.querySelector(a.hash)).filter(Boolean)
+const mark = () => {
+  let cur = heads[0]
+  for (const h of heads) if (h.getBoundingClientRect().top < 140) cur = h
+  links.forEach((a) => a.classList.toggle('on', cur && a.hash === '#' + cur.id))
+}
+addEventListener('scroll', mark, { passive: true })
+mark()
+</script>
 
-<footer>
-  <div class="wrap">
-    <nav aria-label="Footer">
-      <a href="/install/">Install</a>
-      <a href="/privacy/">Privacy</a>
-      <a href="/extend/">Extend Echo</a>
-      <a href="/windows/">Windows builds</a>
-      <a href="/trademark/">Trademark</a>
-      <a href="https://github.com/onetest-ai/echo">GitHub</a>
-    </nav>
-    <span class="made"><img src="/assets/brand/onetest-logo-128.png" alt="" width="20" height="20">© 2026 onetest</span>
-  </div>
+<footer class="foot">
+  <p class="foot-who"><img src="/assets/brand/onetest-logo-128.png" alt="" width="32" height="32">Echo is made by onetest.</p>
+  <nav aria-label="Footer"><a href="/install/">Install</a><a href="/privacy/">Privacy</a><a href="/extend/">Extend Echo</a><a href="/windows/">Windows builds</a><a href="/trademark/">Trademark</a><a href="https://github.com/onetest-ai/echo">GitHub</a></nav>
+  <p class="foot-c">© 2026 onetest</p>
 </footer>
+
 </body>
 </html>
