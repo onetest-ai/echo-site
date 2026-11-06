@@ -209,9 +209,9 @@ ctx.command('summary', async ({ days = 1 }) => {
 
 Runs `fn` every so many seconds (at least 10) while Echo runs. Command-line calls never start timers.
 
-`"uses": { "events": { "on": ["recording_started", "minutes_written"] } }` — Install sheet: “Knows when a recording starts and a call's minutes are written”
+`"uses": { "events": { "on": ["recording_started", "minutes_written"] } }` — Install sheet: “Knows when a recording starts (the call's title) and a call's minutes are written (the call's title)”
 
-A plugin hears only the events it names. A plugin with `echo.read` also hears `minutes_written` and `sources_changed`.
+A plugin hears only the events it names. A plugin that reads sources (`echo.read` with `source` or `sources`) also hears `minutes_written` and `sources_changed`.
 
 #### `ctx.on(event, fn)` — needs `events`
 
@@ -231,9 +231,9 @@ When a meeting is about to start.
 
 When a Teams call starts.
 
-`call_ended` ({ app, recording }):
+`call_ended` ({ app, recording, next_call }):
 
-When a Teams call ends.
+When a Teams call ends; `next_call`: Teams went straight on to another one.
 
 `recording_started` ({ call, title, memo }):
 

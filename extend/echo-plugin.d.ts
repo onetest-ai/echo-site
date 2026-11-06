@@ -59,7 +59,8 @@ export interface Uses {
 export interface EventPayload {
   meeting_soon: { id: string; subject: string | null; start: string | null }
   call_started: { app: string }
-  call_ended: { app: string; recording: boolean }
+  /** next_call: Teams went straight on to another call (a call_started follows at once). */
+  call_ended: { app: string; recording: boolean; next_call: boolean }
   recording_started: { call: string; title: string | null; memo: boolean }
   recording_stopped: { call: string; duration_s: number; reason: string }
   transcribed: { call: string; ok: boolean }
