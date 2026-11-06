@@ -169,7 +169,7 @@ One line for its card in Discover.
 
 `uses` (object):
 
-What it may touch: `claude`, `schedule`, `deliver`, `deliver_provider`, `network`, `folders`, `sessions`, `channel`, `echo`. Each is described with the functions it opens in the [Host API](#host).
+What it may touch: `claude`, `schedule`, `deliver`, `deliver_provider`, `network`, `folders`, `sessions`, `channel`, `echo`, `events`. Each is described with the functions it opens in the [Host API](#host).
 
 `main` (path):
 
@@ -209,9 +209,55 @@ ctx.command('summary', async ({ days = 1 }) => {
 
 Runs `fn` every so many seconds (at least 10) while Echo runs. Command-line calls never start timers.
 
-#### `ctx.on(event, fn)`
+`"uses": { "events": { "on": ["recording_started", "minutes_written"] } }` — Install sheet: “Knows when a recording starts and a call's minutes are written”
 
-Reserved: Echo raises no events to plugins yet. Use a timer (`ctx.every`) or a command meanwhile.
+A plugin hears only the events it names. A plugin with `echo.read` also hears `minutes_written` and `sources_changed`.
+
+#### `ctx.on(event, fn)` — needs `events`
+
+Calls `fn(payload)` each time it happens, while Echo runs (command-line calls hear nothing, and nothing is replayed). Returns a promise that is refused for an event the manifest doesn't name. Payloads carry ids and titles, never what was said: read that with `ctx.echo.read`. `call` is the call's folder name.
+
+```
+ctx.on('minutes_written', ({ call, title, link }) => {
+  ctx.log(`minutes for ${title}: ${link}`)
+})
+```
+
+`meeting_soon` ({ id, subject, start }):
+
+When a meeting is about to start.
+
+`call_started` ({ app }):
+
+When a Teams call starts.
+
+`call_ended` ({ app, recording }):
+
+When a Teams call ends.
+
+`recording_started` ({ call, title, memo }):
+
+When a recording starts.
+
+`recording_stopped` ({ call, duration_s, reason }):
+
+When a recording stops.
+
+`transcribed` ({ call, ok }):
+
+When a call's transcript is ready.
+
+`minutes_written` ({ id, link, call, title }):
+
+When a call's minutes are written.
+
+`thread_synced` ({ thread, processed, left }):
+
+When a thread's work is updated from its calls and mail.
+
+`sources_changed` ({ changed, removed }):
+
+When Echo's sources change.
 
 ### Its own files and settings
 

@@ -50,7 +50,24 @@ export interface Uses {
   channel?: { plugin: string }
   /** ctx.echo.read for these kinds. */
   echo?: { read: Array<'clients' | 'threads'> }
+  /** ctx.on for these events. */
+  events?: { on: EventName[] }
 }
+
+/** What a plugin may hear (uses.events.on), with what each carries: ids and titles, never what was said.
+ *  `call` is the call's folder name. */
+export interface EventPayload {
+  meeting_soon: { id: string; subject: string | null; start: string | null }
+  call_started: { app: string }
+  call_ended: { app: string; recording: boolean }
+  recording_started: { call: string; title: string | null; memo: boolean }
+  recording_stopped: { call: string; duration_s: number; reason: string }
+  transcribed: { call: string; ok: boolean }
+  minutes_written: { id: string; link: string; call: string; title: string | null }
+  thread_synced: { thread: string; processed: number; left: number }
+  sources_changed: { changed: string[]; removed: string[] }
+}
+export type EventName = keyof EventPayload
 
 export interface SettingDef {
   key: string
@@ -75,8 +92,8 @@ export interface HostContext {
   command(name: string, fn: (args: Record<string, Json>) => Json | Promise<Json>): void
   /** Every `seconds` (at least 10) while Echo runs. Needs uses.schedule. Command-line calls never start timers. */
   every(seconds: number, fn: () => void | Promise<void>): void
-  /** Reserved: Echo raises no events to plugins yet. */
-  on(event: string, fn: (payload: Json) => void): void
+  /** Hear an event the manifest names (uses.events.on) while Echo runs; refused (and fn dropped) for one it doesn't. */
+  on<E extends EventName>(event: E, fn: (payload: EventPayload[E]) => void | Promise<void>): Promise<true>
   /** Text files in its own folder in the data folder (<home>/.echo/plugins/<id>/); relative paths only. */
   store: {
     read(path: string): string | null
