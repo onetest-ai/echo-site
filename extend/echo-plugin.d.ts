@@ -29,6 +29,59 @@ export interface EchoPluginManifest {
   client?: string
   /** Values the user sets in its card in Settings → Plugins. */
   settings?: SettingDef[]
+  /** Widgets it adds to Today (at most 12; needs `main`, and `client` for a `page`). */
+  widgets?: WidgetDef[]
+}
+
+/** A Today widget; on Today its id is `plugin:<plugin id>:<id>`. */
+export interface WidgetDef {
+  /** Lowercase letters, digits and dashes, unique in the plugin. */
+  id: string
+  /** Its name on Today, 1–40 characters. */
+  label: string
+  /** A line in Add a widget's catalog, up to 120. */
+  about?: string
+  kind: WidgetKind
+  /** The sizes it takes (S one column of Today, M two, L three); default ["M"]. */
+  sizes?: Array<'S' | 'M' | 'L'>
+  /** "hug" (default): as tall as its content; "fill": as tall as its row. */
+  height?: 'hug' | 'fill'
+  /** Seconds between Echo's asks of its provider, at least 60. */
+  refresh?: number
+  /** Its settings (⚙ in Today's edit mode, `echoctl today set`), at most 6. */
+  params?: WidgetParam[]
+}
+
+export type WidgetKind = 'stat' | 'stats' | 'chart' | 'list' | 'status' | 'card' | 'page'
+
+export interface WidgetParam {
+  key: string
+  label: string
+  /** choice: one of `options` (1–12); thread / client: one of the user's (its id). */
+  type: 'choice' | 'bool' | 'thread' | 'client'
+  options?: string[]
+  default?: string | boolean
+}
+
+export type Tone = 'good' | 'warn' | 'bad'
+
+/** What any widget's data may add: where a click goes, and up to 3 buttons running the host half's commands. */
+export interface WidgetExtras {
+  /** An echo:// place, or an https:// page Echo opens only after the user confirms it. */
+  open?: string
+  actions?: Array<{ label: string; command: string; args?: Record<string, Json> }>
+}
+
+/** A widget's data by its kind (plain JSON, 64 KB at most; Echo escapes every text; a `link` only to echo://). */
+export interface WidgetData {
+  stat: WidgetExtras & { value: number | string; unit?: string; label?: string; tone?: Tone; note?: string; progress?: { used: number; of: number } }
+  stats: WidgetExtras & { items: Array<{ label: string; value: number | string; tone?: Tone }> }
+  chart: WidgetExtras & { type: 'bar' | 'bars' | 'line'; points: Array<{ label: string; value: number }>; unit?: string; note?: string }
+  list: WidgetExtras & { items: Array<{ title: string; sub?: string; link?: string }>; empty?: string }
+  status: WidgetExtras & { state: 'ok' | 'warn' | 'bad'; title: string; text?: string }
+  card: WidgetExtras & { title?: string; text?: string; link?: string }
+  /** Any JSON: the client half draws it (ClientContext.widgets.draw). */
+  page: WidgetExtras & Json
 }
 
 export interface Uses {
@@ -166,6 +219,14 @@ export interface HostContext {
     /** The system's folder picker; the folder picked is granted to the plugin. Needs uses.folders. */
     pickFolder(prompt?: string): Promise<string | null>
   }
+  widgets: {
+    /** Give a widget's data when Echo asks (in the background, within 5 s; again after `refresh`, and when a setting changes). */
+    provide(id: string, fn: (ask: { params: Record<string, string | boolean> }) => Json | Promise<Json>): void
+    /** Push a widget's data now. */
+    set(id: string, data: Json): void
+    /** Nothing to show: the widget takes no place on Today until it has data again. */
+    clear(id: string): void
+  }
   deliver: {
     /** The ways Echo can send to the user now. */
     status(): Json
@@ -294,6 +355,10 @@ export interface ClientContext {
   }
   panels: {
     add(view: { id: string; label: string; icon?: string; area?: 'right' | 'bottom'; when?(): boolean; render(): string }): void
+  }
+  widgets: {
+    /** Draw a `page` widget from its data only (the same data gives the same HTML); escape every text with ui.esc. */
+    draw(id: string, fn: (w: { data: Json; size: 'S' | 'M' | 'L'; theme: 'light' | 'dark' }) => string): void
   }
   /** Open one of its panel views. */
   showPanel(id: string): void

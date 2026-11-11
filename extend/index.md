@@ -183,6 +183,10 @@ Its client half, an ES module loaded into the window. Leave it out for a plugin 
 
 Values the user sets in its card: `{key, label, type, help}` with type `string`, `bool`, `folder` or `secret`. Secrets are stored apart and never shown again.
 
+`widgets` (array):
+
+Widgets it adds to Today, up to 12: each `{id, label, about, kind, sizes, height, refresh, params}`. Its host half gives their data, so a plugin with widgets needs a `main`. See [Today widgets](#widgets).
+
 ## Host API
 
 What `ctx` holds in `main.js`. Every call that waits — Claude Code, HTTPS, the folder picker, reading many files — returns a promise and runs outside the plugin's time slice.
@@ -627,6 +631,168 @@ Where the window is (`{view, section, route}`), going somewhere, and drawing aga
 #### `ctx.ui`
 
 Echo's helpers: `esc` (escape text for HTML), `style`, `notice` (a message in the status line), `relDay`, `ago`, `graph`, `newGraph`. Markdown is the host half's: `ctx.markdown`.
+
+## Today widgets
+
+A plugin can add widgets to **Today**, Echo's first screen. They sit beside Echo's own: Your day, Next meeting, Needs you now, My work. The user puts one on Today from **✎ → Add a widget**, or with `echoctl today add plugin:<plugin>:<widget>`. Then they size it S, M or L and move it like any other, and Echo lays it out to fit the window. The plugin gives only the data: Echo draws it in Today's frame, light or dark, at the size the user chose. One kind, `page`, is drawn by the plugin itself.
+
+![Five plugin widgets on Today: a release status with a Remind owners button, a sprint board drawn by the plugin, a number of open tickets with a progress bar, a bar chart of calls a day, and a list of the last builds with a link](https://echo.onetest.ai/assets/screens/extend/today-widgets.png)
+
+### Declare them in the manifest
+
+Each widget is an entry in `widgets`. The install sheet says how many the plugin adds ("Adds 5 widgets you can put on Today"). They go into Add a widget's catalog under the plugin's name.
+
+```
+{
+  "id": "team-pulse",
+  "name": "Team pulse",
+  "version": "1.0.0",
+  "echo": ">=0.9.0",
+  "main": "main.js",
+  "client": "client.js",
+  "widgets": [
+    { "id": "tickets", "label": "Open tickets", "kind": "stat", "sizes": ["S", "M"],
+      "about": "tickets waiting on the team" },
+    { "id": "calls", "label": "Calls a day", "kind": "chart", "sizes": ["M", "L"], "refresh": 600 },
+    { "id": "builds", "label": "Last builds", "kind": "list", "sizes": ["M", "L"],
+      "params": [{ "key": "branch", "label": "Branch", "type": "choice",
+                   "options": ["main", "release"], "default": "main" }] },
+    { "id": "board", "label": "Sprint board", "kind": "page", "sizes": ["M", "L"] }
+  ]
+}
+```
+
+- `id` — lowercase letters, digits and dashes, unique in the plugin; on Today it is `plugin:<plugin>:<id>`
+
+- `label, about` — its name on Today (up to 40 characters) and a line in the catalog (up to 120)
+
+- `kind` — `stat`, `stats`, `chart`, `list`, `status`, `card` or `page` (a page needs a `client`)
+
+- `sizes` — the sizes it takes, of `S`, `M`, `L`; default `["M"]`. S is one column of Today, M two, L three
+
+- `height` — `hug` (default: as tall as its content) or `fill` (as tall as its row)
+
+- `refresh` — seconds between Echo's asks for its data, 60 at least
+
+- `params` — its settings, up to 6 (see [Settings](#w-params))
+
+### Kinds and their data
+
+The data is plain JSON, up to 64 KB. Echo escapes every text, so a title from a ticket or a build log shows as text, never as HTML. A `tone` is `good`, `warn` or `bad`.
+
+- `stat` — `{ value, unit?, label?, tone?, note?, progress?: { used, of } }`: one number, with a bar when `progress` is given
+
+- `stats` — `{ items: [{ label, value, tone? }] }`: a few numbers side by side
+
+- `chart` — `{ type: "bar" | "bars" | "line", points: [{ label, value }], unit?, note? }`: values are numbers; each point is titled with its value and the last one is marked
+
+- `list` — `{ items: [{ title, sub?, link? }], empty? }`: rows, and what to say when there are none
+
+- `status` — `{ state: "ok" | "warn" | "bad", title, text? }`: a light and a line
+
+- `card` — `{ title?, text?, link? }`: a short text
+
+- `page` — any JSON: the plugin's window half draws it (see [A page of its own](#w-page))
+
+A `link` in an item goes only to an `echo://` place (a call, a task, a thread). Data that doesn't fit its kind shows in the widget as "Couldn't draw this", with what is wrong. Check a widget's data from the terminal with `echoctl widget show plugin:<plugin>:<widget>`.
+
+### Give the data — the host half
+
+Either Echo asks for it, or the plugin pushes it. `ctx.widgets.provide` answers when Echo asks: in the background, while Today shows the last answer at once, and again after `refresh`. The answer has to come within 5 seconds. `ctx.widgets.set` pushes data whenever the plugin has it, and `ctx.widgets.clear` takes it away. Work that takes longer, such as asking Claude Code, runs as a job whose result the plugin `set`s when it is done.
+
+```
+// main.js
+export function apply(ctx) {
+  ctx.widgets.provide('tickets', async () => {
+    const open = await countOpenTickets()          // the plugin's own call (needs network in uses)
+    return { value: open, label: 'open tickets', tone: open > 10 ? 'warn' : 'good',
+             progress: { used: open, of: 20 } }
+  })
+
+  // Pushed when the plugin learns something, e.g. from its own timer
+  ctx.every(300, async () => {
+    const ci = await readCi()
+    ctx.widgets.set('release', { state: ci.ok ? 'ok' : 'bad', title: ci.ok ? 'main is green' : 'main is red' })
+  })
+}
+```
+
+- `ctx.widgets.provide(id, ({ params }) => data)` — asked in the background; `params` are its settings. The same data is drawn at every size, so give what the largest shows
+
+- `ctx.widgets.set(id, data)` — the data now; Today draws it at its next read
+
+- `ctx.widgets.clear(id)` — nothing to show: the widget takes no place on Today until it has data again
+
+Only ids the manifest declares are taken.
+
+### Settings
+
+A widget's `params` become its settings: the user opens them with ⚙ on the widget in Today's edit mode, or sets them with `echoctl today set <widget> <key> <value>`. Each one is `{ key, label, type, options?, default? }`.
+
+- `choice` — one of its `options` (1 to 12)
+
+- `bool` — on or off
+
+- `thread` — one of the user's open threads (its id)
+
+- `client` — one of the user's clients (its id)
+
+The provider gets them as `params`: the defaults, then what the user set. Echo never gives a value the setting doesn't take. When the user changes one, Echo asks again. The same widget can be on Today only once, so its settings are its own.
+
+```
+ctx.widgets.provide('builds', ({ params }) => ({
+  items: lastBuilds(params.branch).map((b) => ({ title: `${params.branch} #${b.n} ${b.result}`, sub: b.ago })),
+}))
+```
+
+### Links and actions
+
+Any widget's data may carry `open` and `actions`.
+
+- `open` — where a click on the widget goes: an `echo://` place opens in Echo; an `https://` page asks "Open <host>?" in the widget first and opens in the browser only on a second click
+
+- `actions` — up to 3 buttons, `[{ label, command, args }]`: a click runs the host half's `ctx.command(command)` with `args`, then Today reads the plugin's widgets again; the command answers with `ctx.widgets.set`
+
+```
+ctx.widgets.set('release', {
+  state: 'warn', title: 'Two blockers left', text: 'Acme sign-off due Friday',
+  open: 'https://ci.example/release/2.4',
+  actions: [{ label: 'Remind owners', command: 'remind', args: { release: '2.4' } }],
+})
+ctx.command('remind', async ({ release }) => { /* … */ return true })
+```
+
+### A page of its own — the client half
+
+For what the six kinds can't show, a `page` widget is drawn by the plugin's window half, inside Echo's frame. The draw gets the data its host half gave, the widget's size and the theme, and returns HTML.
+
+```
+// client.js
+export function apply(ctx) {
+  ctx.ui.style('.tp-board{display:flex;gap:10px} .tp-board div{flex:1;border:1px solid var(--line);border-radius:8px;text-align:center}')
+  ctx.widgets.draw('board', ({ data, size, theme }) =>
+    `<div class="tp-board">${data.cols.map((c) =>
+      `<div><b>${ctx.ui.esc(String(c.count))}</b>${ctx.ui.esc(c.name)}</div>`).join('')}</div>`)
+}
+```
+
+Draw from `data` only: the same data must give the same HTML. Escape every text with `ctx.ui.esc`; here the plugin, not Echo, is drawing. Don't keep state in the page and don't call `ctx.render()` from a draw: Today draws it again when its data or size changes. Use Echo's CSS tokens and it looks right in light and dark.
+
+### Waiting and failing
+
+Today never jumps because a plugin is slow, and never hides why a widget is empty.
+
+- Not answered yet — its place on Today is held, at its size, with a placeholder (`aria-busy`); Today reads again within seconds and the answer fills that place
+
+- Its first ask failed — its frame stays with one line: "Couldn't get its data — <why>", e.g. "didn't answer within 5 s"
+
+- A later ask failed — its last data stays, dated
+
+- Data it can't draw — "Couldn't draw this — <what is wrong>"
+
+- Nothing to show — (no data, or `clear`) it takes no place until it has some
+
+`echoctl widget list` shows every widget Echo and its plugins offer; `echoctl widget show <id>` shows one's data, when it was given and the last error.
 
 ## Marketplaces
 

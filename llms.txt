@@ -4,8 +4,8 @@
 
 ## Extending Echo
 
-- [Extend Echo (Markdown)](https://echo.onetest.ai/extend/index.md): the plugin documentation — what a plugin is, a quick start, the manifest, the host API (`ctx` in main.js), every place a plugin shows up in the window (slots, panels, Settings pages, ⌘K actions, activities with graphs, Inbox items) with what each receives, marketplaces, the security model and the command line.
-- [echo-plugin.d.ts](https://echo.onetest.ai/extend/echo-plugin.d.ts): TypeScript types for the manifest, `HostContext`, `ClientContext`, the slot targets (`calendar.event`, `call.menu`, `task.actions`), Inbox items and Claude Code runs.
+- [Extend Echo (Markdown)](https://echo.onetest.ai/extend/index.md): the plugin documentation — what a plugin is, a quick start, the manifest, the host API (`ctx` in main.js), every place a plugin shows up in the window (slots, panels, Settings pages, ⌘K actions, activities with graphs, Inbox items) with what each receives, Today widgets (the manifest's `widgets`, the seven kinds and their data, `ctx.widgets.provide/set/clear`, settings, links and actions, a page of its own), marketplaces, the security model and the command line.
+- [echo-plugin.d.ts](https://echo.onetest.ai/extend/echo-plugin.d.ts): TypeScript types for the manifest, `HostContext`, `ClientContext`, the slot targets (`calendar.event`, `call.menu`, `task.actions`), Inbox items, Claude Code runs and Today widgets (`WidgetDef`, `WidgetData` by kind, `ctx.widgets`).
 - [Echo's own plugins](https://github.com/onetest-ai/echo-plugins): Scheduler, Telegram and Obsidian — working examples, and the built-in marketplace.
 
 ## Echo
