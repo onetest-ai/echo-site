@@ -38,6 +38,12 @@ class Md(HTMLParser):
         if tag == "small" and " f " in f" {inside} ".replace("fields", ""):
             self.out.append(" ("); self.stack[-1] = "small-f"
             return
+        if tag == "span" and "new" in cls.split():  # which Echo it needs: "(after 0.9.14)"
+            self.out.append(" *("); self.stack[-1] = "span-new"
+            return
+        if tag == "sup":
+            self.out.append("^")
+            return
         if tag == "span" and "capline" in inside:
             self.out.append(" — ")
             return
@@ -88,6 +94,9 @@ class Md(HTMLParser):
         opened = self.stack.pop()
         if self.cls:
             self.cls.pop()
+        if opened == "span-new":
+            self.out.append(")* ")
+            return
         if opened == "small-f":
             self.out.append("): ")
             return
@@ -126,6 +135,9 @@ p = Md(); p.feed(body)
 md = "".join(p.out)
 md = re.sub(r"\n{3,}", "\n\n", md).strip() + "\n"
 md = re.sub(r"`` ", "`", md)
+md = re.sub(r"(^|\S) *\*\(after", lambda m: (m.group(1) + " " if m.group(1) else "") + "*(after", md, flags=re.M)
+md = re.sub(r"\)\* +([).,;:]|$)", r")*\1", md, flags=re.M)
+md = re.sub(r"\)\* {2,}", ")* ", md)
 head = (f"<!-- Generated from extend/index.html by tools/html2md.py. Types: {SITE}/extend/echo-plugin.d.ts -->\n\n")
 open(os.path.join(ROOT, "extend", "index.md"), "w", encoding="utf-8").write(head + md)
 print(len(md))
