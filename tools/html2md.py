@@ -38,7 +38,7 @@ class Md(HTMLParser):
         if tag == "small" and " f " in f" {inside} ".replace("fields", ""):
             self.out.append(" ("); self.stack[-1] = "small-f"
             return
-        if tag == "span" and "new" in cls.split():  # which Echo it needs: "(after 0.9.14)"
+        if tag == "span" and "new" in cls.split():  # which Echo it needs: "(0.10.0)"
             self.out.append(" *("); self.stack[-1] = "span-new"
             return
         if tag == "sup":
