@@ -175,5 +175,5 @@ html:not(.x-js) .step-tabs { display: none; }
 .gets dd .rules { margin: 6px 0 0; }
 .lbl { margin: 14px 0 4px; color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
 .fn > p { max-width: 72ch; }
-.code { white-space: pre-wrap; overflow-wrap: anywhere; }
-.code code { white-space: inherit; }
+.dart :not(pre) > code { overflow-wrap: anywhere; }
+.gets dt, .gets dd, .f > *, .fn { min-width: 0; }

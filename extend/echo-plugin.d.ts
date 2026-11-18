@@ -872,7 +872,7 @@ export interface ClientContext {
     removeSkill(name: string): Promise<true>
   }
   /** After 0.9.14, uses.folders, only on the user's click or key: shows a file or folder of a given folder in Finder / Explorer. */
-  system: { reveal(root: string, path: string): Promise<unknown> }
+  system: { reveal(root: string, path: string): Promise<true> }
   echo: {
     /** uses.echo.jobs: Echo's background jobs. */
     jobs: {
