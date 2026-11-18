@@ -92,9 +92,13 @@ export interface Uses {
   ai?: { wrapper: { name: string; command: string } }
   /** After 0.9.14: its window half hears the microphone (ctx.microphone). */
   microphone?: {}
+  /** After 0.9.14: its host half reads About me (ctx.me). */
+  me?: {}
+  /** After 0.9.14: its window half adds skills to the user's own Claude Code, each on a click (ctx.claude.installSkill). */
+  skills?: boolean
 }
 
-export type EchoReadKind = 'clients' | 'threads' | 'people' | 'dictionary' | 'sources' | 'source' | 'calls' | 'calendar' | 'me'
+export type EchoReadKind = 'clients' | 'threads' | 'people' | 'dictionary' | 'sources' | 'source' | 'calls' | 'calendar' | 'me' | 'recording'
 
 /** After 0.9.14. On its sheet, off until the user switches it on; its id among Echo's jobs is `<plugin>.<id>`. */
 export interface RoutineDef {
@@ -234,17 +238,32 @@ export interface WidgetAsk {
 
 // ── events ──────────────────────────────────────────────────────────────────────────────────────────────────────
 
-/** What a plugin may hear (uses.events.on): ids and titles, never what was said. `call` is the call's folder name. */
+/** What a plugin may hear (uses.events.on): ids and titles, never what was said. `call` is the call's folder name;
+ *  after 0.9.14 `stamp` is the `YYYY-MM-DD_HHMMSS` its folder name starts with, kept when the call is retitled (two calls started
+ *  in the same second share one). */
 export interface EventPayload {
   meeting_soon: { id: string; subject: string | null; start: string | null; threads: string[] }
   call_started: { app: string }
-  call_ended: { app: string; recording: boolean }
-  recording_started: { call: string; title: string | null; memo: boolean }
-  recording_stopped: { call: string; duration_s: number; reason: string }
-  transcribed: { call: string; ok: boolean }
-  minutes_written: { id: string; link: string; call: string; title: string | null }
+  /** After 0.9.14: next_call, true when Teams went straight on to another call. */
+  call_ended: { app: string; recording: boolean; next_call: boolean }
+  /** After 0.9.14: stamp; title is the arm's, else the meeting's subject. */
+  recording_started: { call: string; stamp: string; title: string | null; memo: boolean }
+  /** After 0.9.14: stamp; reason is call_ended, user, next_call, computer_slept or watch_stopped. */
+  recording_stopped: { call: string; stamp: string; duration_s: number; reason: 'call_ended' | 'user' | 'next_call' | 'computer_slept' | 'watch_stopped' }
+  /** After 0.9.14: stamp. */
+  transcribed: { call: string; stamp: string; ok: boolean }
+  /** After 0.9.14: the keys after `title`. `revision`: 16 hex characters of the minutes, another when they change; `rewritten`: Echo told
+   *  this call's minutes before. A plugin that reads sources (uses.echo.read names source or sources) also gets `threads`, `client`,
+   *  `profile`, `participants` and `minutes` (without `body`), as echo.read('source') gives them. No transcript or chat. */
+  minutes_written: {
+    id: string; link: string; call: string; stamp: string; title: string | null
+    started_at: string | null; ended_at: string | null; duration_min: number | null; app: string; memo: boolean; revision: string; rewritten: boolean
+    threads?: SourceThread[]; client?: { id: string; name: string } | null; profile?: string | null; participants?: Participant[]; minutes?: Omit<CallMinutes, 'body'>
+  }
   thread_synced: { thread: string; processed: number; left: number }
-  sources_changed: { changed: string[]; removed: string[] }
+  /** After 0.9.14: readers (a plugin that reads sources) also get `items`, for each changed one (100 at most): what Echo decided when it
+   *  indexed it, never its text. */
+  sources_changed: { changed: string[]; removed: string[]; items?: SourceItem[] }
   threads_changed:
     | { thread: string; born: string; change: 'renamed'; name: string; from: string }
     | { thread: string; born: string; change: 'merged'; into: string; dropped: string[] }
@@ -252,6 +271,33 @@ export interface EventPayload {
   shared_changed: { namespace: string; key: string; thread?: string; by: string }
 }
 export type EventName = keyof EventPayload
+
+/** After 0.9.14: a thread of a source, and the shapes echo.read('source' | 'sources' | 'calls' | 'people' | 'recording') gives. */
+export interface SourceThread { id: string; name: string; client: string | null; client_name: string | null }
+export interface Participant { name: string; email?: string; /** Its key in echo.read('people'), or null when Echo doesn't know them. */ person: string | null }
+export interface CallMinutes {
+  summary: string
+  /** The bullets under headings with "decision" / "question" (or their Ukrainian and Russian words); 50 at most. */
+  decisions: string[]
+  questions: string[]
+  actions: Array<{ id: string; text: string; owner: string | null; due: string | null; done: boolean }>
+  /** 16 hex characters of the minutes. */
+  revision: string
+  /** The minutes' Markdown from their first `## ` heading. */
+  body: string
+}
+/** A mail conversation or channel post as Echo indexed it (never a message's own words). */
+export interface SourceItem {
+  id: string; kind: 'mail' | 'channel'; title: string; subject: string; at: string; threads: string[]; client: { id: string; name: string } | null
+  profile: string | null; from: string[]; people: string[]; trust: 'trusted'; link: string; url: string | null
+  /** For ctx.m365.mailThread; null for a channel post and for what Echo didn't keep. */
+  m365_id: string | null; conversation_id: string | null
+}
+export interface PersonRow {
+  key: string; name: string; aliases: string[]; email: string | null; also: string[]; organisation: string | null; client: string | null
+  title: string | null; threads: string[]; link: string
+}
+export interface AboutMe { text: string; parts: Record<string, string>; name: string | null; /** 8 hex characters of `text`: another one, an edit to read again. */ hash: string }
 
 // ── the host half (main.js): runs inside Echo ──────────────────────────────────────────────────────────────────
 // QuickJS, 64 MB shared by all host halves, 5 s of JavaScript between awaits. Promises run outside the slice.
@@ -290,6 +336,10 @@ export interface ClaudeRun {
   path?: string
   /** read (default); edit (needs folders.write); copy (an edit run on a snapshot in its store). */
   mode?: 'read' | 'edit' | 'copy'
+  /** After 0.9.14: 1–64 letters, digits, `.`, `_` or `-` (any case is one key). One run at a time per plugin and key; stop it with ctx.claude.stop. */
+  key?: string
+  /** After 0.9.14, only with mode "copy": paths under the root the snapshot leaves out, 100 at most. */
+  exclude?: string[]
 }
 
 export interface Snapshot { path: string; files: number; bytes: number; skipped: number; why: { large: number; unreadable: number } }
@@ -359,6 +409,19 @@ export interface HttpOpts {
   file?: FileHandle | string
 }
 
+/** After 0.9.14: what ctx.web.read gives. */
+export interface WebPage {
+  url: string; title: string; markdown: string
+  /** Absolute http(s) links of the main part, each once (2,000 at most). */
+  links: Array<{ text: string; href: string }>
+  /** Each once (500 at most); with images: 'save', `saved` is a file handle or `error` says why not. */
+  images: Array<{ src: string; alt: string; caption: string; width: number | null; height: number | null; saved?: FileHandle & { type: string }; error?: string }>
+  lang: string | null; byline: string | null; published: string | null; description: string | null
+  source: 'html' | 'json-ld' | 'state' | 'noscript' | 'meta'
+  /** Under 200 characters of text on a page with scripts. */
+  needs_js: boolean; truncated: boolean; bytes: number
+}
+
 export interface FsStat { kind: 'file' | 'dir' | 'link' | 'other'; size: number; mtime: number; real: string | null; sha?: string }
 
 export interface HostContext {
@@ -377,7 +440,8 @@ export interface HostContext {
   on<E extends EventName>(event: E, fn: (payload: EventPayload[E]) => void | Promise<void>): Promise<true>
   /** Text files in its own folder in the data folder; relative paths only. Every write takes its lock across processes. */
   store: {
-    read(path: string): string | null
+    /** After 0.9.14: it throws on a file that isn't UTF-8; {lossy: true} gives it with those bytes as U+FFFD. */
+    read(path: string, opts?: { lossy?: boolean }): string | null
     /** After 0.9.14: {ifSha} only while the file's sha256 is still that; {createNew} only where no file is. */
     write(path: string, text: string, opts?: { ifSha?: string; createNew?: boolean }): void
     /** After 0.9.14: read, fn, write only over what was read (fn may run again); → the text kept. */
@@ -386,6 +450,9 @@ export interface HostContext {
     remove(path: string): void
     /** The absolute path of a file in it. */
     path(path?: string): string
+    /** After 0.9.14: the files under a folder of its store ("" the store), paths relative to it; 20,000 rows by default, 100,000 at most;
+     *  `sha` for files up to 64 MB; a folder that isn't there gives []. */
+    walk(path: string, opts?: { ext?: string[]; hidden?: boolean; max?: number; sha?: boolean }): Promise<Array<{ path: string; size: number; mtime: number; sha?: string }>>
     /** What it keeps there (its own files only). */
     size(dir?: string): { bytes: number; files: number }
   }
@@ -407,10 +474,10 @@ export interface HostContext {
   }
   /** After 0.9.14: ws:// and wss:// to an address the user listed. */
   net: { websocket(url: string, opts?: { headers?: Record<string, string>; protocols?: string[] }): Promise<WebSocketConn> }
-  /** Echo's safe Markdown writer. With opts (after 0.9.14): a vault page with wikilinks and images, 1 MB at most. */
+  /** Echo's safe Markdown writer. With opts (after 0.9.14): a vault page with wikilinks and images, 2 MB at most. */
   markdown: ((md: string, opts?: MarkdownOpts) => string) & {
-    /** After 0.9.14: what to resolve first, each destination once as written. */
-    links(md: string): { links: string[]; images: string[] }
+    /** After 0.9.14: what to resolve first, each destination once as written. `detail: true` adds `entries`: each way it was written. */
+    links(md: string, opts?: { detail?: boolean }): { links: string[]; images: string[]; entries?: Array<{ dest: string; kind: 'wiki' | 'md'; embed: boolean }> }
   }
   /** A system notification from Echo. */
   notify(title: string, body?: string): void
@@ -421,6 +488,9 @@ export interface HostContext {
   claude: {
     /** Needs uses.claude; a folder run also uses.folders. */
     run(opts: ClaudeRun): Promise<ClaudeResult>
+    /** After 0.9.14: stops the plugin's own run under that key (Claude Code and everything it started). true; false when none runs.
+     *  The stopped `run` fails with the message "stopped". */
+    stop(key: string): Promise<boolean>
     /** Is the channel plugin uses.channel names installed for the default profile? */
     hasPlugin(spec: string, profile?: string): Promise<Json>
     /** Install it at the default profile's user scope; only that spec. */
@@ -441,12 +511,44 @@ export interface HostContext {
   agent: { set(part: { summary?: string; entries: Array<{ name: string; summary: string; guide: string }> }): void }
   echo: {
     /** Read-only, kinds in uses.echo.read. calls, calendar, me, and the richer source: after 0.9.14. */
-    read(kind: 'clients' | 'threads' | 'people' | 'dictionary' | 'calendar' | 'me'): Json
-    read(kind: 'sources', opts?: { kind?: string; thread?: string; since?: string; limit?: number }): Json
-    read(kind: 'source', id: string): Json
-    read(kind: 'calls', opts?: { q?: string; since?: string; limit?: number }): Json
+    read(kind: 'clients' | 'threads' | 'dictionary' | 'me'): Json
+    /** After 0.9.14: {key, name, aliases, email, also, organisation, client, title, threads, link} of everyone in the open threads. */
+    read(kind: 'people'): PersonRow[]
+    /** After 0.9.14: `from` / `to` YYYY-MM-DD by the start's day in the user's time zone, both days in; each meeting also has `client`. */
+    read(kind: 'calendar', opts?: { from?: string; to?: string }): Json
+    /** After 0.9.14: `client`, `q`; newest first, no text; limit 200 (1,000 at most). */
+    read(kind: 'sources', opts?: { kind?: 'call' | 'mail' | 'channel'; thread?: string; client?: string; q?: string; since?: string; limit?: number }): Json
+    /** 'call:<folder>', after 0.9.14 'call:<stamp>', or 'mail:<source>'. A call also has stamp, started_at, ended_at, duration_min, app, platform,
+     *  memo, attendees, participants, minutes (CallMinutes), transcript and chat; a mail or post also what Echo decided (subject, at, from,
+     *  people, trust, url, m365_id, conversation_id, messages). `client` is {id, name} when the threads have one client between them. */
+    read(kind: 'source', id: string, opts?: { transcript?: boolean; chat?: boolean }): Json
+    /** After 0.9.14: `until`, `thread`, `client`; each call also has stamp, duration_min, app, participants, client. limit 50 (500 at most). */
+    read(kind: 'calls', opts?: { q?: string; since?: string; until?: string; thread?: string; client?: string; limit?: number }): Json
+    /** After 0.9.14: whether Echo is recording or transcribing a call now (uses.echo.read: recording). */
+    read(kind: 'recording'): { state: 'recording' | 'transcribing' | 'idle'; call: string | null; stamp: string | null }
     /** uses.echo.write: dictionary. */
     dictionary: { add(term: { name: string; synonyms?: string[]; spellings?: string[]; kind?: string; client?: string }): Json }
+  }
+  /** After 0.9.14, uses.me: what the user wrote in Settings → About me, in the parts asked (none: all but `patterns`);
+   *  null when it is missing, empty or still the template. 20,000 characters at most. No event: read it when needed. */
+  me(opts?: { kinds?: Array<'identity' | 'people' | 'terms' | 'style' | 'patterns'> }): Promise<AboutMe | null>
+  /** After 0.9.14: the plugin's own values per client, by a client's id (no grant): the twin of ctx.threads, same limits
+   *  (key 1–80 chars, JSON ≤ 16 KB, 64 keys a client, 4 MB in all). null removes; a key with a dot is refused; a client that isn't there is refused. */
+  clients: {
+    get(client: string, key: string): Json
+    set(client: string, key: string, value: Json): void
+    list(key: string): Array<{ client: string; value: Json }>
+  }
+  /** After 0.9.14: read a web page as safe Markdown. No capability of its own: a GET under the network grants (named host, listed
+   *  address, or the typed page), no redirect followed. What comes back is untrusted: show it only through ctx.markdown. */
+  web: {
+    /** HTML only, 5 MB (`max` less), 30 s (`timeout` less). `images: 'save'` also downloads its pictures (50, 10 MB each) into cache/web/;
+     *  a picture may come from any public host (the one widening: GET, https, port 80 or 443, a public address only). */
+    read(url: string, opts?: { max?: number; timeout?: number; images?: 'save' }): Promise<WebPage>
+    /** One file the plugin may reach, as a handle; 10 MB (`max` up to 50 MB), 2 minutes. */
+    fetch(url: string, opts?: { max?: number }): Promise<FileHandle & { type: string }>
+    /** The same as read for HTML the plugin has; nothing is fetched. `base` (http(s), 2 KB) resolves relative links. 5 MB. */
+    markdown(html: string, opts?: { base?: string }): Promise<Omit<WebPage, 'url' | 'bytes'>>
   }
   /** Its own values per thread (no grant); a `<ns>.<name>` key is shared with its marketplace's plugins. */
   threads: {
@@ -469,9 +571,10 @@ export interface HostContext {
     folders(): string[]
     forget(root: string): void
     list(root: string, path?: string): Array<{ name: string; dir: boolean }>
-    /** Up to `max` bytes (default 1 MB, at most 4 MB). */
-    read(root: string, path: string, max?: number): string
-    readMany(root: string, paths: string[], max?: number): Promise<Array<string | null>>
+    /** Up to `max` bytes (default 1 MB, at most 4 MB). Bytes that aren't UTF-8 come as U+FFFD; after 0.9.14 `strict: true` throws "not UTF-8: <path>" instead. */
+    read(root: string, path: string, max?: number | { max?: number; strict?: boolean }): string
+    /** After 0.9.14 `strict`: null also for a file that isn't UTF-8. 5,000 paths at most. */
+    readMany(root: string, paths: string[], max?: number | { max?: number; strict?: boolean }): Promise<Array<string | null>>
     /** `sha` (after 0.9.14): each file's sha256, up to 64 MB. */
     walk(root: string, opts?: { path?: string; ext?: string[]; hidden?: boolean; max?: number; sha?: boolean }): Promise<Array<{ path: string; size: number; mtime: number; sha?: string }>>
     /** After 0.9.14. */
@@ -496,7 +599,7 @@ export interface HostContext {
     info(root: string): Promise<{ repo: false } | { repo: true; branch: string | null; head: string | null; detached: boolean; busy: 'merge' | 'rebase' | 'cherry-pick' | 'revert' | 'bisect' | null; subfolder: boolean }>
     status(root: string, opts?: { paths?: string[] }): Promise<Array<{ path: string; code: string; from?: string }>>
     log(root: string, opts?: { path?: string; max?: number }): Promise<Array<{ rev: string; author: string; email: string; date: string; subject: string; echo: string | null; path?: string }>>
-    show(root: string, rev: string, path: string, opts?: { max?: number }): Promise<{ text: string; size: number; truncated: boolean } | null>
+    show(root: string, rev: string, path: string, opts?: { max?: number; /** Refuse a file that isn't UTF-8 instead of replacing its bad bytes. */ strict?: boolean }): Promise<{ text: string; size: number; truncated: boolean } | null>
     init(root: string, opts?: { branch?: string }): Promise<Json>
     commit(root: string, opts: { paths: string[]; message: string }): Promise<{ rev: string | null }>
   }
@@ -557,7 +660,7 @@ export type ThreadStage = 'lead' | 'proposal' | 'negotiation' | 'kickoff' | 'act
 
 // ── the client half (client.js): runs in the Echo window ────────────────────────────────────────────────────────
 
-export type Slot = 'calendar.event' | 'call.menu' | 'task.actions' | 'thread.profile' | 'call.row' | 'knowledge.tab' | 'knowledge.settings'
+export type Slot = 'calendar.event' | 'call.menu' | 'task.actions' | 'thread.profile' | 'client.profile' | 'call.row' | 'call.header' | 'call.minutes' | 'knowledge.tab' | 'knowledge.settings'
 
 export interface SlotTargets {
   'calendar.event': { kind: 'event'; event: CalendarEvent }
@@ -569,7 +672,8 @@ export interface SlotTargets {
 
 /** A button in calendar.event, call.menu or task.actions. */
 export interface SlotItem<S extends keyof SlotTargets> {
-  label: string
+  /** A text, or after 0.9.14 a synchronous function of the target (one that throws or gives nothing leaves the item out). */
+  label: string | ((target: SlotTargets[S]) => string | null | undefined)
   /** An SVG string before the label. */
   icon?: string
   /** Its tooltip. */
@@ -590,13 +694,57 @@ export interface ThreadProfileItem {
   after?(box: HTMLElement, thread: { id: string; name: string; client: string | null }): void
 }
 
+/** After 0.9.14: a row on a client's Profile, under its Threads. As ThreadProfileItem. */
+export interface ClientProfileItem {
+  id: string
+  label: string
+  render(client: { id: string; name: string }): string
+  after?(box: HTMLElement, client: { id: string; name: string }): void
+}
+
+/** What call.header and call.minutes get: only what the page has. */
+export interface SlotCall {
+  /** The call's folder name. */
+  name: string
+  /** `YYYY-MM-DD_HHMMSS`, kept when the call is retitled: key a record by it. */
+  stamp: string
+  title: string
+  started_at: string | null
+  /** Whether it has minutes. */
+  notes: boolean
+  /** Its AI profile, or null. */
+  profile: string | null
+  memo: boolean
+  /** Its threads' ids and the first of their clients (or null). */
+  threads: string[]
+  client: string | null
+}
+
+/** After 0.9.14: a box of the plugin's own on a call's header, before My notes and ⋯. The box is `position: relative`. */
+export interface CallHeaderItem {
+  id: string
+  label: string
+  /** Synchronous HTML (escape every text). */
+  render(call: SlotCall): string
+  /** Once per box drawn afresh (again for another call). */
+  after?(box: HTMLElement, call: SlotCall): void
+}
+
+/** After 0.9.14: a line in the box that says a call's minutes are coming; drawn only while they are. */
+export interface CallMinutesItem {
+  id: string
+  label: string
+  /** Synchronous HTML; nothing is not drawn. */
+  render(call: SlotCall): string
+}
+
 /** After 0.9.14: a chip on each call's row. */
 export interface CallRowItem {
   id: string
   /** The chip's tooltip. */
   label: string
   /** Synchronous: a short text (24 chars), or nothing for no chip. */
-  chip(call: { name: string; title: string; started_at: string | null; status: string; memo: boolean }): string | null | undefined
+  chip(call: { name: string; stamp: string; title: string; started_at: string | null; status: string; memo: boolean }): string | null | undefined
 }
 
 export interface CalendarEvent {
@@ -625,6 +773,8 @@ export interface CalendarEvent {
 export interface Call {
   /** The call's folder name: how commands and the CLI name it. */
   name: string
+  /** After 0.9.14: `YYYY-MM-DD_HHMMSS`, kept when the call is retitled. */
+  stamp: string
   title: string
   started_at: string
   minutes: number | null
@@ -668,11 +818,14 @@ export interface ClientContext {
   /** After 0.9.14, macOS: files dropped while its activity or Knowledge tab is shown. */
   onFileDrop(fn: (files: FileHandle[]) => void): void
   /** After 0.9.14: Echo's writer from the window, async. */
-  markdown: ((md: string, opts?: MarkdownOpts) => Promise<string>) & { links(md: string): Promise<{ links: string[]; images: string[] }> }
+  markdown: ((md: string, opts?: MarkdownOpts) => Promise<string>) & { links(md: string, opts?: { detail?: boolean }): Promise<{ links: string[]; images: string[]; entries?: Array<{ dest: string; kind: 'wiki' | 'md'; embed: boolean }> }> }
   slots: {
     list(): Slot[]
     add<S extends keyof SlotTargets>(slot: S, item: SlotItem<S>): void
     add(slot: 'thread.profile', item: ThreadProfileItem): void
+    add(slot: 'client.profile', item: ClientProfileItem): void
+    add(slot: 'call.header', item: CallHeaderItem): void
+    add(slot: 'call.minutes', item: CallMinutesItem): void
     add(slot: 'call.row', item: CallRowItem): void
     add(slot: 'knowledge.tab' | 'knowledge.settings', item: Record<string, unknown>): void
   }
@@ -695,7 +848,13 @@ export interface ClientContext {
   }
   activities: {
     /** A page of its own in the left bar; address #<plugin>:<id>/<its route>. after(box) runs after each render. */
-    add(a: { id: string; label: string; icon?: string; render(): string; after?(box: HTMLElement): void }): void
+    add(a: {
+      id: string; label: string; icon?: string; render(): string; after?(box: HTMLElement): void
+      /** After 0.9.14: a count shown on its icon (1–99, then "99+"), or '!' (Settings' attention mark); anything else shows none. Synchronous. */
+      badge?(): number | string | null | undefined
+      /** After 0.9.14: true leaves the activity's box as it is on Echo's redraws, until it says otherwise. Synchronous. */
+      editing?(): boolean
+    }): void
   }
   palette: {
     add(item: { label: string; group?: string; keywords?: string; run(target: PaletteTarget): unknown }): void
@@ -704,7 +863,16 @@ export interface ClientContext {
     /** After 0.9.14, uses.claude + uses.folders: Claude Code in a folder it was given, in Echo's terminal, on the user's
      *  click or key (else it throws). The user's session: the plugin can't type into it or read it. */
     session(opts: { folder: string; path?: string; mode?: 'read' | 'edit'; profile?: string }): void
+    /** After 0.9.14, uses.skills, only on the user's click or key: a skill in the user's own Claude Code (`~/.claude/skills/<name>/SKILL.md`).
+     *  `name` 1–64 of a-z, 0-9, `-`; `md` the whole SKILL.md, 256 KB at most, a skill that runs nothing (frontmatter only name, description,
+     *  when_to_use, argument-hint, disable-model-invocation, user-invocable; no `!` commands). Never over a skill that is there already
+     *  unless this plugin added it; removing the plugin takes out every skill it added. */
+    installSkill(name: string, md: string): Promise<true>
+    /** After 0.9.14: takes out only a skill this plugin added. */
+    removeSkill(name: string): Promise<true>
   }
+  /** After 0.9.14, uses.folders, only on the user's click or key: shows a file or folder of a given folder in Finder / Explorer. */
+  system: { reveal(root: string, path: string): Promise<unknown> }
   echo: {
     /** uses.echo.jobs: Echo's background jobs. */
     jobs: {
@@ -726,8 +894,10 @@ export interface ClientContext {
     isOpen(): boolean
   }
   /** Where the window is. */
-  where(): { view: string; section: string; route: string; tab?: string }
-  go(hash: string): void
+  /** `recall` after 0.9.14: whether Recall is on. */
+  where(): { view: string; section: string; route: string; tab?: string; recall?: boolean }
+  /** After 0.9.14 `replace: true`: the address changes without a history step (Back skips it); the hash it is already at only redraws. */
+  go(hash: string, opts?: { replace?: boolean }): void
   /** Draw the window again after its data changed. */
   render(): void
   /** Echo's own pieces, so a plugin looks like Echo. */
@@ -739,6 +909,11 @@ export interface ClientContext {
     stylesheet(path: string): Promise<void>
     /** After 0.9.14: replace a box's HTML unless it is what patch last wrote there (focus, typed text and scroll stay). */
     patch(el: HTMLElement, html: string): void
+    /** After 0.9.14: the plugin's HTML in Echo's dialog frame over the window; returns the sheet's box. One at a time. Esc, a click beside it
+     *  or closeSheet() close it and call onClose once. */
+    sheet(html: string, opts?: { label?: string; onClose?: () => void }): HTMLElement
+    /** After 0.9.14: closes the plugin's own sheet. */
+    closeSheet(): void
     /** The clipboard, on the user's click or key (else it throws); 10,000 characters at most. */
     copy(text: string): void
     /** A message in the window's status line. */

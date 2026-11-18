@@ -14,7 +14,7 @@
 <meta property="og:description" content="macOS or Windows, Claude Code and its Echo plugin, Microsoft 365 — a check after each step.">
 <meta property="og:image" content="https://echo.onetest.ai/assets/brand/og.png">
 <link rel="stylesheet" href="/assets/home.css">
-<link rel="stylesheet" href="/assets/extend.css?v=10">
+<link rel="stylesheet" href="/assets/extend.css?v=11">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -54,7 +54,7 @@
       <div class="step-t"><span class="qs-n">1</span><h3>macOS</h3><p>Download the dmg, open it and drag <b>Echo</b> onto <b>Applications</b>. Open Echo from Applications: its octopus appears in the menu bar and in the Dock.</p></div>
       <figure class="file"><figcaption>From the latest release</figcaption><pre><code>Echo-&lt;version&gt;-macos-arm64.dmg</code></pre></figure>
     </li><li class="qs-step">
-      <div class="step-t"><span class="qs-n">2</span><h3>Windows</h3><p>Download the installer and run it. Windows may say it protected your PC: the installer isn't code-signed yet (<a href="/windows/">why</a>), so choose <b>More info → Run anyway</b>. No administrator rights are needed; Echo starts when it ends, in the tray behind the ^ next to the clock.</p></div>
+      <div class="step-t"><span class="qs-n">2</span><h3>Windows</h3><p>Download the installer and run it.</p><ul class="rules"><li>Windows may say it protected your PC: the installer isn't code-signed yet (<a href="/windows/">why</a>), so choose <b>More info → Run anyway</b>.</li><li>No administrator rights are needed; Echo starts when it ends, in the tray behind the ^ next to the clock.</li></ul></div>
       <figure class="file"><figcaption>From the latest release</figcaption><pre><code>echo-&lt;version&gt;-windows-x64.msi</code></pre></figure>
     </li>
   </ol>
@@ -88,15 +88,15 @@
   </div>
 
   <h2 id="connect">4. Connect Claude Code to Echo</h2>
-  <p><b>Settings → General → Claude Code plugin → Connect</b>, or the menu's <b>Claude Code → Connect Claude Code</b>. It installs Echo's plugin into Claude Code for Echo's data folder — the status line, <code>/echo:process-call</code>, <code>/echo:record</code> and <code>/echo:doctor</code> — and then checks Claude Code really lists it. If it doesn't, the notification says so and what to run instead.</p>
+  <p><b>Settings → General → Claude Code plugin → Connect</b>, or the menu's <b>Claude Code → Connect Claude Code</b>.</p><ul class="rules"><li>It installs Echo's plugin into Claude Code for Echo's data folder — the status line, <code>/echo:process-call</code>, <code>/echo:record</code> and <code>/echo:doctor</code> — and then checks Claude Code really lists it.</li><li>If it doesn't, the notification says so and what to run instead.</li></ul>
   <p>For every Claude Code session on this computer, not only Echo's:</p>
   <pre class="code"><code>echoctl claude connect --scope user</code></pre>
   <p class="dlinks"><b>Check:</b> <b>Settings → Health → Echo plugin</b> has a ✓, and <b>Settings → General → Claude Code plugin</b> says <b>Installed ✓</b>.</p>
 
   <h2 id="m365">5. Microsoft 365: calendar, chat, mail</h2>
   <p><b>Settings → Calendar &amp; chat → Account → Sign in…</b> Your browser opens your organisation's sign-in. Echo reads your calendar and meeting chats, and sends the mail you ask Claude to send, with its own sign-in.</p>
-  <p>Echo signs in with the public app registration of <a href="https://github.com/codemie-ai/codemie-code">CodeMie Code</a>, the open-source Claude Code wrapper — the same one its <a href="https://github.com/codemie-ai/codemie-code/tree/main/src/agents/plugins/claude/plugin/skills/msgraph">Microsoft 365 skill</a> uses, so your IT may have approved it already. If your IT blocks it, ask them to approve it, or to register an app for you and put its ID under <b>App registration → Change…</b> on the same page.</p>
-  <p>Mail from Claude in the Echo window always goes through Echo first, from your own account and after you say yes. Claude uses its own Microsoft 365 connector only when Echo can't send; if neither can, it opens a draft in your mail app.</p>
+  <p>Echo signs in with the public app registration of <a href="https://github.com/codemie-ai/codemie-code">CodeMie Code</a>, the open-source Claude Code wrapper — the same one its <a href="https://github.com/codemie-ai/codemie-code/tree/main/src/agents/plugins/claude/plugin/skills/msgraph">Microsoft 365 skill</a> uses, so your IT may have approved it already.</p><ul class="rules"><li>If your IT blocks it, ask them to approve it, or to register an app for you and put its ID under <b>App registration → Change…</b> on the same page.</li></ul>
+  <p>Mail from Claude in the Echo window always goes through Echo first, from your own account and after you say yes.</p><ul class="rules"><li>Claude uses its own Microsoft 365 connector only when Echo can't send</li><li>If neither can, it opens a draft in your mail app.</li></ul>
   <p class="dlinks"><b>Check:</b> the <b>Calendar</b> view shows today's meetings.</p>
 
   <h2 id="try">6. Try it</h2>
@@ -126,7 +126,7 @@
   </div>
 
   <h2 id="update">Updating and removing</h2>
-  <p>Echo checks for updates every 6 hours and offers them in its menu (<b>Update to …</b>). Removing Echo keeps your calls: on macOS drag Echo from Applications to the Bin; on Windows open Settings → Apps → Installed apps → Echo → Uninstall. Your calls folder stays where you put it.</p>
+  <p>Echo checks for updates every 6 hours and offers them in its menu (<b>Update to …</b>).</p><ul class="rules"><li>Removing Echo keeps your calls: on macOS drag Echo from Applications to the Bin</li><li>On Windows open Settings → Apps → Installed apps → Echo → Uninstall.</li><li>Your calls folder stays where you put it.</li></ul>
   <p>Questions: <a href="https://github.com/onetest-ai/echo/issues">GitHub issues</a>.</p>
   </article>
 </section>

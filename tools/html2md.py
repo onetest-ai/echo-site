@@ -50,6 +50,9 @@ class Md(HTMLParser):
         if tag == "li" and "qs-step" in cls:
             self.step += 1; self.in_step = True; self.nl(); self.stack[-1] = "div"
             return
+        if tag == "p" and "lbl" in cls.split():  # a small label above a block: Options, Limits, Example
+            self.nl(); self.out.append("**")
+            return
         if tag in ("h1", "h2", "h3"):
             self.nl(); self.out.append("#" * int(tag[1]) + " ")
             if tag == "h3" and self.in_step:
@@ -92,8 +95,10 @@ class Md(HTMLParser):
         if not self.stack:
             return
         opened = self.stack.pop()
-        if self.cls:
-            self.cls.pop()
+        popped = self.cls.pop() if self.cls else ""
+        if tag == "p" and "lbl" in popped.split():
+            self.out.append("**"); self.nl()
+            return
         if opened == "span-new":
             self.out.append(")* ")
             return
