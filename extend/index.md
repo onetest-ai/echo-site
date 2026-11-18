@@ -34,7 +34,7 @@ Echo loads enabled plugins when it starts and again after an install, an update,
 - Switched off, a plugin's settings section, panels, buttons, timers, connections and skills are gone.
 - Its files stay in its own folder until it is removed.
 
-Echo grows its plugin API with each release. What is marked *(after 0.9.14)* comes with the next Echo release: a plugin that uses it sets `echo` in its manifest to that version.
+Echo grows its plugin API with each release. What is marked  *(0.10.0)* needs Echo 0.10.0 or later: a plugin that uses it sets `"echo": ">=0.10.0"` in its manifest.
 
 [echo-plugin.d.ts](https://echo.onetest.ai/extend/echo-plugin.d.ts) — the types of `ctx` in both halves, the manifest and every `target`, for your editor and for agents · [This page as Markdown](https://echo.onetest.ai/extend/index.md) · `echoctl plugin guide` prints the reference this page is made from, as your Echo has it
 
@@ -73,7 +73,7 @@ File echo-plugin.json:
   "id": "standup",
   "name": "Standup",
   "version": "0.1.0",
-  "echo": ">=0.9.14",
+  "echo": ">=0.10.0",
   "summary": "Yesterday's calls as a three-line standup",
   "uses": { "claude": {} },
   "main": "main.js",
@@ -180,7 +180,7 @@ Up to 60 characters: what people see on its card, in Settings and on the install
 
 `echo` (string):
 
-The Echo it needs: `">=0.9.14"`. An older Echo shows "Needs Echo 0.9.14 or later" instead of Install.
+The Echo it needs: `">=0.10.0"`. An older Echo shows "Needs Echo 0.10.0 or later" instead of Install.
 
 `summary` (string):
 
@@ -212,7 +212,7 @@ Up to 6 ready-made dashboards for a thread or a client, offered for the user to 
 
 `routines` (array):
 
-*(after 0.9.14)* Up to 4 Claude Code routines it ships, off until the user switches each on. See [Routines](#routines).
+ *(0.10.0)* Up to 4 Claude Code routines it ships, off until the user switches each on. See [Routines](#routines).
 
 `skills` (array):
 
@@ -265,7 +265,7 @@ Echo's data it reads, what it writes, Echo's background jobs. [Echo's data](#dat
 
 `m365` ({read: [...]}):
 
-*(after 0.9.14)* Microsoft 365 mail and chats, read-only. [Microsoft 365](#m365)
+ *(0.10.0)* Microsoft 365 mail and chats, read-only. [Microsoft 365](#m365)
 
 `signin` ({hosts, keep}):
 
@@ -301,15 +301,15 @@ An AI profile it offers. [Wrapper profiles](#wrapper)
 
 `microphone` ({}):
 
-*(after 0.9.14)* Its window half hears the microphone, on the user's click. [Microphone](#mic)
+ *(0.10.0)* Its window half hears the microphone, on the user's click. [Microphone](#mic)
 
 `me` ({}):
 
-*(after 0.9.14)* Its host half reads About me. [About me](#about-me)
+ *(0.10.0)* Its host half reads About me. [About me](#about-me)
 
 `skills` (true):
 
-*(after 0.9.14)* Its window half adds skills to the user's own Claude Code, each on a click. [Skills in the user's Claude Code](#own-skills)
+ *(0.10.0)* Its window half adds skills to the user's own Claude Code, each on a click. [Skills in the user's Claude Code](#own-skills)
 
 ## Host API
 
@@ -328,7 +328,7 @@ Only `ctx.every` needs it; commands need nothing.
 
 A command others can run: the plugin's client half (`ctx.call`), an Inbox button, a widget's action, or `echoctl plugin call`.
 
-- `fn(args, { files })` gets the arguments as an object and, second, the file handles its caller passed (`[]` otherwise; *(after 0.9.14)*)
+- `fn(args, { files })` gets the arguments as an object and, second, the file handles its caller passed (`[]` otherwise;  *(0.10.0)*)
 - It may be async, returns anything JSON can hold and throws an `Error` to fail.
 - A command the window calls has 30 seconds.
 
@@ -353,7 +353,7 @@ Runs `fn` every so many seconds (at least 10) while Echo runs.
 A plugin hears only the events it names.
 
 - A plugin that reads `sources` or `source` also hears `minutes_written` and `sources_changed`.
-- *(after 0.9.14)* It hears them whole, with the extra keys marked readers below.
+-  *(0.10.0)* It hears them whole, with the extra keys marked readers below.
 - Any other plugin hears them without those keys.
 
 #### `ctx.on(event, fn)` — needs `events`
@@ -363,7 +363,7 @@ Calls `fn(payload)` each time it happens, while Echo runs.
 - Returns a promise that is refused for an event the manifest doesn't name.
 - Payloads carry ids and titles, never what was said: read that with `ctx.echo.read('source', …)`.
 - `call` is the call's folder name.
-- *(after 0.9.14)* A call also has a `stamp`, the `YYYY-MM-DD_HHMMSS` its folder name starts with.
+-  *(0.10.0)* A call also has a `stamp`, the `YYYY-MM-DD_HHMMSS` its folder name starts with.
 - A retitle changes the folder name but not the stamp, so key your own records by it.
 - Two calls started in the same second share one stamp.
 - Events are not replayed — but `threads_changed` and `shared_changed` from another process wait for the running app and arrive at least once.
@@ -386,15 +386,15 @@ A call starts (Teams, Google Meet).
 
 `call_ended` ({ app, recording, next_call }):
 
-A call ends. *(after 0.9.14)* `next_call` is true when Teams went straight on to another call.
+A call ends.  *(0.10.0)* `next_call` is true when Teams went straight on to another call.
 
 `recording_started` ({ call, stamp, title, memo }):
 
-A recording starts. *(after 0.9.14)* `stamp` is the call's stamp; `title` is the arm's, else the meeting's subject.
+A recording starts.  *(0.10.0)* `stamp` is the call's stamp; `title` is the arm's, else the meeting's subject.
 
 `recording_stopped` ({ call, stamp, duration_s, reason }):
 
-A recording stops. *(after 0.9.14)* `reason` is `call_ended`, `user`, `next_call`, `computer_slept` or `watch_stopped`.
+A recording stops.  *(0.10.0)* `reason` is `call_ended`, `user`, `next_call`, `computer_slept` or `watch_stopped`.
 
 `transcribed` ({ call, stamp, ok }):
 
@@ -404,7 +404,7 @@ A call's transcript is ready (`ok` false when it failed).
 
 A call's minutes are written.
 
-- *(after 0.9.14)* `revision` is 16 hex characters of the minutes and changes when they do.
+-  *(0.10.0)* `revision` is 16 hex characters of the minutes and changes when they do.
 - `rewritten` means Echo told this call's minutes before.
 - Readers also get `threads`, `client`, `profile`, `participants` and `minutes` (without its `body`), as `ctx.echo.read('source')` gives them.
 - No transcript or chat.
@@ -417,7 +417,7 @@ A thread's work is updated from its calls and mail.
 
 Echo's sources (calls, mail, channels) change.
 
-- *(after 0.9.14)* Readers also get `items`: for each changed one (100 at most) what Echo decided when it indexed it — `{id, kind, title, subject, at, threads, client, profile, from, people, trust, link, url, m365_id, conversation_id}`, never its text.
+-  *(0.10.0)* Readers also get `items`: for each changed one (100 at most) what Echo decided when it indexed it — `{id, kind, title, subject, at, threads, client, profile, from, people, trust, link, url, m365_id, conversation_id}`, never its text.
 - A removed one has only its id.
 
 `threads_changed` ({ thread, born, change, … }):
@@ -436,13 +436,13 @@ Text files in the plugin's own folder inside the user's data folder, by relative
 
 - A name at its top level is plain ASCII.
 - `read` of a missing file gives `null`.
-- *(after 0.9.14)* `read` throws on a file that isn't UTF-8.
-- *(after 0.9.14)* `read(path, { lossy: true })` gives such a file with those bytes as �.
+-  *(0.10.0)* `read` throws on a file that isn't UTF-8.
+-  *(0.10.0)* `read(path, { lossy: true })` gives such a file with those bytes as �.
 - Every write takes the plugin's lock across processes (the app and `echoctl plugin call`).
-- *(after 0.9.14)* `write(path, text, { ifSha })` writes only while the file's sha256 is still `ifSha` (else "changed since you read it").
-- *(after 0.9.14)* `write(path, text, { createNew: true })` writes only where no file is ("is there already").
+-  *(0.10.0)* `write(path, text, { ifSha })` writes only while the file's sha256 is still `ifSha` (else "changed since you read it").
+-  *(0.10.0)* `write(path, text, { createNew: true })` writes only where no file is ("is there already").
 
-#### `ctx.store.update(path, fn) · ctx.crypto.sha256(text)` *(after 0.9.14)*
+#### `ctx.store.update(path, fn) · ctx.crypto.sha256(text)` *(0.10.0)*
 
 `update` reads, calls `fn(text | null)` and writes its answer only over what it read.
 
@@ -460,7 +460,7 @@ const seen = ctx.store.update('seen.json', (t) => {
 })
 ```
 
-#### `await ctx.store.walk(path, { ext, hidden, max, sha })` *(after 0.9.14)*
+#### `await ctx.store.walk(path, { ext, hidden, max, sha })` *(0.10.0)*
 
 Lists the files under a folder of its own store, as `ctx.fs.walk` does for a folder the user gave it.
 
@@ -481,7 +481,7 @@ Its own installed files, read-only — templates, prompts, defaults it ships.
 
 Echo keeps its own files in the store and refuses a plugin's write of them.
 
-- They are `settings.json`, `inbox.json`, `widgets.json`, `threads.json`, `work.json`, and *(after 0.9.14)* `client-values.json`.
+- They are `settings.json`, `inbox.json`, `widgets.json`, `threads.json`, `work.json`, and  *(0.10.0)* `client-values.json`.
 - They change through `ctx.settings`, `ctx.inbox`, `ctx.widgets`, `ctx.threads`, `ctx.clients` and `ctx.work`.
 - What lies in `cache/` over 7 days Echo removes (`ctx.cache.size()` says what is there)
 - The rest is the plugin's to remove.
@@ -498,7 +498,7 @@ The plugin's own values per thread, no grant needed: `key` 1–80 characters, th
 - They follow the thread when it is renamed, merged or deleted — hear it with `threads_changed`.
 - Keep what belongs to a thread here, not in the store.
 
-#### `ctx.clients.get(client, key) · set(client, key, value) · list(key)` *(after 0.9.14)*
+#### `ctx.clients.get(client, key) · set(client, key, value) · list(key)` *(0.10.0)*
 
 The plugin's own values per client: the twin of `ctx.threads`, by a client's id.
 
@@ -561,7 +561,7 @@ Become a way to send (never `teams` or `mail`): Echo calls `send(msg)` for messa
 
 Echo's safe Markdown writer: HTML with raw HTML shown as text, each line kept, `https://` and `echo://` links only, no images. For a page of a vault, with wikilinks and pictures, see [Markdown pages](#markdown).
 
-### Markdown pages *(after 0.9.14)*
+### Markdown pages  *(0.10.0)*
 
 #### `ctx.markdown(md, { breaks, links, images }) · ctx.markdown.links(md, { detail })`
 
@@ -612,7 +612,7 @@ ctx.listen('click', (e) => {
 })
 ```
 
-### Microsoft 365 *(after 0.9.14)*
+### Microsoft 365  *(0.10.0)*
 
 `"uses": { "m365": { "read": ["mail", "chats"] } }` — Install sheet: “Reads your Microsoft 365 mail and Teams chats through Echo's sign-in when it asks: it searches them and reads a mail's thread with its attachments' names or a chat's messages over some days — it never sends”
 
@@ -660,7 +660,7 @@ Runs one of the plugin's declared scripts and gives `{status, stdout, stderr, tr
 - `args` are plain strings, 100 at most.
 - There is no stdin; output is 1 MB each for `stdout` and `stderr`.
 - It runs without Echo's secrets or any `CLAUDE*` / `ANTHROPIC*` key.
-- *(after 0.9.14)* It runs with `ECHO_PLUGIN_SCRIPT=1`: an `echoctl` it starts refuses every change to Echo plugins — installs, updates, removals, switching on or off, their settings, marketplaces and certificates.
+-  *(0.10.0)* It runs with `ECHO_PLUGIN_SCRIPT=1`: an `echoctl` it starts refuses every change to Echo plugins — installs, updates, removals, switching on or off, their settings, marketplaces and certificates.
 - Async: the host half keeps answering while it runs.
 - One run of a script at a time.
 - In Echo's sessions, `SKILL.md` names it by its path alone (`scripts/read.sh <args>`).
@@ -703,7 +703,7 @@ Runs Claude Code headless as the Claude · Echo folder session would, acting on 
 - `profile` one of the user's AI profiles (the default when left out; a wrapper only when it is the default).
 - `timeout` in minutes (1–60, default 20).
 - `dir` its working folder inside the store (default `runs/<time>`).
-- *(after 0.9.14)* `tools`: left out, it is the user's setting for routines; or one of these:
+-  *(0.10.0)* `tools`: left out, it is the user's setting for routines; or one of these:
 
 - `"auto"` — Claude Code's auto mode
 
@@ -722,7 +722,7 @@ const { answer, usage } = await ctx.claude.run({
 })
 ```
 
-#### `ctx.claude.run({ folder, path, mode, prompt, … })` — needs `claude`, `folders` *(after 0.9.14)*
+#### `ctx.claude.run({ folder, path, mode, prompt, … })` — needs `claude`, `folders` *(0.10.0)*
 
 In a folder the user gave it (`folder` a root as `ctx.fs.folders()` names it, `path` a subfolder): Claude Code starts there as that folder's own project — its `CLAUDE.md`, `.claude/` skills, settings and hooks — with none of Echo's session, no MCP server, never Bash or the web.
 
@@ -757,7 +757,7 @@ const r = await ctx.claude.run({
 const changed = await ctx.store.list(r.snapshot.path)
 ```
 
-#### `ctx.claude.run({ …, key }) · ctx.claude.stop(key)` — needs `claude` *(after 0.9.14)*
+#### `ctx.claude.run({ …, key }) · ctx.claude.stop(key)` — needs `claude` *(0.10.0)*
 
 Gives a run a name, so the plugin can stop it.
 
@@ -777,7 +777,7 @@ ctx.command('tidy', () =>
 ctx.command('stop-tidy', () => ctx.claude.stop('tidy'))
 ```
 
-#### `ctx.claude.session({ folder, path, mode, profile })` — client half · `claude`, `folders` *(after 0.9.14)*
+#### `ctx.claude.session({ folder, path, mode, profile })` — client half · `claude`, `folders` *(0.10.0)*
 
 From the window half, opens Claude Code in Echo's terminal, in a folder the user gave the plugin.
 
@@ -789,7 +789,7 @@ From the window half, opens Claude Code in Echo's terminal, in a folder the user
 - Asked again while it runs, it is shown.
 - Switched off or removed, the plugin's session runs on as the user's.
 
-### Skills in the user's own Claude Code *(after 0.9.14)*
+### Skills in the user's own Claude Code  *(0.10.0)*
 
 `"uses": { "skills": true }` — Install sheet: “Adds instructions for Claude Code (skills) to your own Claude Code (~/.claude/skills), each only when you click to add it: skills that run commands are refused, never over a skill that is there already, changing or removing only the skills it added — they go when you remove the plugin”
 
@@ -860,7 +860,7 @@ Whether the Claude Code channel plugin its manifest names (`uses.channel.plugin`
 
 ## Routines
 
-### Routines of its own *(after 0.9.14)*
+### Routines of its own  *(0.10.0)*
 
 A plugin may ship up to 4 Claude Code routines (with `uses.claude`).
 
@@ -942,14 +942,14 @@ The system's folder picker.
 
 - The folder picked is given to this plugin (and listed in its card)
 - Returns its path, or `null`.
-- *(after 0.9.14)* The picker lets the user make a new folder in it (“New Folder” on macOS, “Make New Folder” on Windows), so a plugin that wants a new folder, such as a new vault, just asks for one.
+-  *(0.10.0)* The picker lets the user make a new folder in it (“New Folder” on macOS, “Make New Folder” on Windows), so a plugin that wants a new folder, such as a new vault, just asks for one.
 - The folder made and picked is the one given.
 
 #### `ctx.fs.folders() · forget(root) · list(root, path) · read(root, path, max)` — needs `folders`
 
 The roots it was given, giving one back, a folder's entries, and a file's text (1 MB by default, 4 MB at most).
 
-- *(after 0.9.14)* Bytes that aren't UTF-8 come as �.
+-  *(0.10.0)* Bytes that aren't UTF-8 come as �.
 - `read(root, path, { max, strict: true })` throws "not UTF-8: <path>" instead, and `readMany(root, paths, { max, strict })` gives `null` for such a file (5,000 paths at most).
 
 #### `ctx.fs.readMany(root, paths, max) · walk(root, { path, ext, hidden, max, sha })` — needs `folders`
@@ -958,7 +958,7 @@ For big folders, off the plugin's time slice.
 
 - `readMany` gives many files' texts in order (`null` for one that can't be read).
 - `walk` gives every file under `path` as `{path, size, mtime}`, dot folders left out unless `hidden`.
-- *(after 0.9.14)* `sha: true` adds each file's sha256 (up to 64 MB).
+-  *(0.10.0)* `sha: true` adds each file's sha256 (up to 64 MB).
 
 **Example**
 
@@ -968,7 +968,7 @@ const files = await ctx.fs.walk(root, { ext: ['md'] })
 const texts = await ctx.fs.readMany(root, files.map((f) => f.path))
 ```
 
-#### `ctx.fs.stat(root, path, { sha }) · search(root, query, opts)` — needs `folders` *(after 0.9.14)*
+#### `ctx.fs.stat(root, path, { sha }) · search(root, query, opts)` — needs `folders` *(0.10.0)*
 
 `stat`: `{kind: file | dir | link | other, size, mtime, real, sha?}` or `null` — the last name never followed.
 
@@ -980,13 +980,13 @@ const texts = await ctx.fs.readMany(root, files.map((f) => f.path))
 
 Change the folders it was given: write a file (atomically), move one (never over another), delete one or an empty folder.
 
-- *(after 0.9.14)* `ifSha` writes only while the file is still the one it read ("“path” changed since you read it: read it again")
+-  *(0.10.0)* `ifSha` writes only while the file is still the one it read ("“path” changed since you read it: read it again")
 - `createNew: true` (or `ifSha: null`) never over a file.
 - `append(root, path, text)` adds at the end (1 MB at most), making the file.
 - `mkdir(root, path)` makes the folder and those above it.
 - Every write takes the plugin's lock across processes.
 
-#### `ctx.fs.snapshot(root, { exclude, hidden, maxFiles, maxBytes })` — needs `folders` *(after 0.9.14)*
+#### `ctx.fs.snapshot(root, { exclude, hidden, maxFiles, maxBytes })` — needs `folders` *(0.10.0)*
 
 A copy of the folder in the store's `cache/snapshots/<id>/` to work on with `ctx.store`: `{path, files, bytes, skipped, why: {large, unreadable}}`.
 
@@ -996,11 +996,11 @@ A copy of the folder in the store's `cache/snapshots/<id>/` to work on with `ctx
 - One at a time, 3 kept (2 GB in all).
 - `ctx.store.remove(path)` removes it.
 
-**Its pictures in the window** *(after 0.9.14)*.
+**Its pictures in the window**  *(0.10.0)*.
 
 - The window half shows an image of a folder it was given from `plugin/<id>/folder/<encodeURIComponent(root)>/<path>`: png, jpg, gif and webp only (no svg), 10 MB at most, inside the folder.
 
-### Hidden files it may write *(after 0.9.14)*
+### Hidden files it may write  *(0.10.0)*
 
 A name that starts with `.` is read in a folder the plugin was given, but never written. These few are the exception, matched by their exact names (`.Claude` is not `.claude`).
 
@@ -1028,7 +1028,7 @@ A name that starts with `.` is read in a folder the plugin was given, but never 
 - A skill file must run nothing: the same [rules](#skill-rules) as for `installSkill`.
 - No sheet line of their own: `folders.write` covers them.
 
-### Files the user hands it *(after 0.9.14)*
+### Files the user hands it  *(0.10.0)*
 
 A file the user picks, drops on the plugin's view or names with `echoctl plugin call … --file` reaches the plugin as a **handle**.
 
@@ -1074,7 +1074,7 @@ ctx.command('import', async (_, { files }) => {
 
 The text of a file its manifest names (that very entry; 1 to 5 of them, `~/…`, `%APPDATA%/…`, `%LOCALAPPDATA%/…`), 1 MB at most, or `null` when it isn't on this computer.
 
-### Git *(after 0.9.14)*
+### Git  *(0.10.0)*
 
 In a folder it was given (`uses.folders`; `init` and `commit` also `folders.write`), async and off its time slice. No line on the sheet beyond the folder's.
 
@@ -1117,9 +1117,9 @@ Echo runs git itself, never through a shell, with the repository's own hooks, fi
 
 `"uses": { "network": { "hosts": ["api.example.com"] } }` — Install sheet: “Talks to api.example.com over HTTPS”
 
-`"uses": { "network": { "hosts_from": ["server"] } }` — *(after 0.9.14)* Install sheet: “Talks to the addresses you list in its setting “server” (wildcards allowed, plain http too; its window part also over WebSocket)”
+`"uses": { "network": { "hosts_from": ["server"] } }` —  *(0.10.0)* Install sheet: “Talks to the addresses you list in its setting “server” (wildcards allowed, plain http too; its window part also over WebSocket)”
 
-`"uses": { "network": { "ask": true } }` — *(after 0.9.14)* Install sheet: “Fetches a web page from an address you type in Echo's own box when it asks — that page only, once each time”
+`"uses": { "network": { "ask": true } }` —  *(0.10.0)* Install sheet: “Fetches a web page from an address you type in Echo's own box when it asks — that page only, once each time”
 
 `hosts`: `https://` to those hosts only.
 
@@ -1131,7 +1131,7 @@ Echo runs git itself, never through a shell, with the repository's own hooks, fi
 
 - GET, POST, PUT, PATCH or DELETE; 60 seconds and 10 MB.
 - `save`: a path in its store to keep the answer in (audio or a picture is shown from `/plugin/<id>/store/<path>`).
-- *(after 0.9.14)* `file`: a handle the user handed it, sent as the body with POST, PUT or PATCH.
+-  *(0.10.0)* `file`: a handle the user handed it, sent as the body with POST, PUT or PATCH.
 - With `save` or `file`, 512 MB each way and 15 minutes.
 
 **Example**
@@ -1148,10 +1148,10 @@ const r = await ctx.http.fetch('https://api.example.com/v1/items', {
 
 - They are comma- or space-separated.
 - `*` stands for a leading name label (`http://*.lab.local`), a number of an IPv4 address but the first (`http://192.168.1.*`) or the port (`:*`).
-- *(after 0.9.14)* Plain http goes to any host the user listed.
+-  *(0.10.0)* Plain http goes to any host the user listed.
 - One outside their own network gets a note on the setting's row: "plain http: anyone on the way can read it".
 
-#### `ctx.http.stream(url, { method, headers, body, file }, onChunk)` — needs `network` *(after 0.9.14)*
+#### `ctx.http.stream(url, { method, headers, body, file }, onChunk)` — needs `network` *(0.10.0)*
 
 An answer as it comes (server-sent events, chunked): returns `{status, headers, done, cancel()}` at once.
 
@@ -1159,7 +1159,7 @@ An answer as it comes (server-sent events, chunked): returns `{status, headers, 
 - `done` resolves `{status, bytes, cancelled}`.
 - No time limit, 512 MB at most.
 
-#### `ctx.net.websocket(url, { headers, protocols })` — needs `network.hosts_from` *(after 0.9.14)*
+#### `ctx.net.websocket(url, { headers, protocols })` — needs `network.hosts_from` *(0.10.0)*
 
 `ws://` and `wss://` to an address the user listed (never a `hosts` host).
 
@@ -1179,13 +1179,13 @@ ws.onClose = ({ code }) => ctx.log('closed', code)
 
 A plugin keeps 8 connections (streams and WebSockets) open at once; switching it off, updating or removing it closes them all.
 
-**Certificates the system doesn't trust** *(after 0.9.14)* — a server of the user's own, self-signed or from an internal CA.
+**Certificates the system doesn't trust**  *(0.10.0)* — a server of the user's own, self-signed or from an internal CA.
 
 - https and wss to a listed address fail the first time with the key met there: "the certificate at <host:port> isn't one this computer trusts (its key: sha256//…): if it is your own server's, trust it in Settings → Plugins → <name>, or with echoctl plugin trust <id> <host:port>".
 - Only the user trusts it — in the plugin's detail under Certificates, or `echoctl plugin trust`. No plugin can.
 - From then on that address is reached with that key alone, and another key is refused until the user trusts it.
 
-#### `ctx.http.askAddress()` — needs `network.ask` *(after 0.9.14)*
+#### `ctx.http.askAddress()` — needs `network.ask` *(0.10.0)*
 
 Echo's own box — the system's text dialog, not the plugin's page — asks the user for an address.
 
@@ -1203,7 +1203,7 @@ Echo's own box — the system's text dialog, not the plugin's page — asks the 
 - A header that isn't a plain token or holds a line break (and `Content-Length` or `Transfer-Encoding` with `file`)
 - A request past its time or size.
 
-### From the window half *(after 0.9.14)*
+### From the window half  *(0.10.0)*
 
 The window half reaches the addresses the user listed with the page's own Web APIs, and no other outside address.
 
@@ -1217,7 +1217,7 @@ The window half reaches the addresses the user listed with the page's own Web AP
 - macOS lets the window reach plain `http://` / `ws://` only to an IP address, a `.local` name or a one-label name; macOS 15 may ask once for Local Network access.
 - A self-signed certificate isn't accepted by the window: reach such a server from the host half.
 
-### Reading a web page *(after 0.9.14)*
+### Reading a web page  *(0.10.0)*
 
 Reads a page from the web as safe Markdown, with its links and pictures. There is no capability of its own and no line on the sheet: it is a GET under the network grants above.
 
@@ -1312,27 +1312,27 @@ Read-only, a kind named in the manifest:
 
 - `people` — who the people in the threads are.
 
-- *(after 0.9.14)* `{key, name, aliases, email, also, organisation, client, title, threads, link}`: `aliases` the other names Echo knows them by, `also` their other addresses, `client` their organisation's id, `key` what a call's `participants[].person` names.
+-  *(0.10.0)* `{key, name, aliases, email, also, organisation, client, title, threads, link}`: `aliases` the other names Echo knows them by, `also` their other addresses, `client` their organisation's id, `key` what a call's `participants[].person` names.
 
 - `dictionary` — the dictionary
 
 - `sources` — the calls and the facts of the threads' mail and channels, by `{kind, thread, since, limit}`.
 
-- *(after 0.9.14)* Also by `client` and `q` (every word in its title; a mail's subject and senders too).
+-  *(0.10.0)* Also by `client` and `q` (every word in its title; a mail's subject and senders too).
 - Newest first, no text: a call with minutes `{id, stamp, kind, title, date, threads, client}`.
 - A mail or post gives what `source` gives, without `text` and `messages`.
 - `limit` 200 (1,000 at most)
 
-- `source` — One call, mail conversation or channel post, with its text. `read('source', id, opts?)` takes `call:<folder>`, *(after 0.9.14)* `call:<stamp>` or `mail:<source>`; a call needs its minutes.
+- `source` — One call, mail conversation or channel post, with its text. `read('source', id, opts?)` takes `call:<folder>`,  *(0.10.0)* `call:<stamp>` or `mail:<source>`; a call needs its minutes.
 
 **Every source**
 
-- `{id, kind, title, date, text, link, threads, profile}`, and *(after 0.9.14)* `client`.
+- `{id, kind, title, date, text, link, threads, profile}`, and  *(0.10.0)* `client`.
 - `profile`: the AI profile its text may go to.
 - `threads` are each `{id, name, client, client_name}`.
 - `client` is `{id, name}` when the threads have one client between them, else `null`.
 
-**A call *(after 0.9.14)* **
+**A call  *(0.10.0)* **
 
 - Read by its folder or its stamp; `id` stays the folder's.
 - `stamp`, `started_at`, `ended_at`, `duration_min`, `app`, `platform`, `memo`.
@@ -1341,7 +1341,7 @@ Read-only, a kind named in the manifest:
 - `transcript`, and `chat`: `[{at, from, text, files}]`. A third argument `{transcript: false}` or `{chat: false}` leaves them out.
 - `minutes`: `{summary, decisions, actions, questions, revision, body}`.
 
-**Its minutes *(after 0.9.14)* **
+**Its minutes  *(0.10.0)* **
 
 - `summary`: the text under the summary heading.
 - `decisions`, `questions`: the bullets under those headings, also in Ukrainian and Russian; 50 at most.
@@ -1349,13 +1349,13 @@ Read-only, a kind named in the manifest:
 - `revision`: as in `minutes_written`.
 - `body`: the Markdown from the first `## ` heading.
 
-**A mail conversation or channel post *(after 0.9.14)* **
+**A mail conversation or channel post  *(0.10.0)* **
 
 - What Echo decided when it indexed it: `subject`, `at`, `from`, `people`, `trust`, `url`.
 - `m365_id` (for `ctx.m365.mailThread`) and `conversation_id`.
 - `text` and `messages` `[{from, at, text, link}]`: facts, never a message's own words.
 
-- `calls` *(after 0.9.14)* — Your calls, newest first, with or without minutes: `read('calls', {q, since, until, thread, client, limit})`.
+- `calls`  *(0.10.0)* — Your calls, newest first, with or without minutes: `read('calls', {q, since, until, thread, client, limit})`.
 
 - Each call is `{id, stamp, title, date, started_at, ended_at, duration_min, app, memo, minutes, transcript, chat, people, participants, threads, client, profile}`.
 - `q` every word in its title, folder, subject or people.
@@ -1363,20 +1363,20 @@ Read-only, a kind named in the manifest:
 - `thread` and `client` an id.
 - `limit` 50 (500 at most)
 
-- `calendar` *(after 0.9.14)* — the agenda Echo last read, by start: `read('calendar', {from, to})`: `{id, subject, start, end, organizer, attendees, join_url, response, threads, client}`.
+- `calendar`  *(0.10.0)* — the agenda Echo last read, by start: `read('calendar', {from, to})`: `{id, subject, start, end, organizer, attendees, join_url, response, threads, client}`.
 
 - `from` and `to` are `YYYY-MM-DD` by the start's day in the user's time zone, both days in.
 - `client` is `{id, name}` when the threads have one between them.
 
-- `me` *(after 0.9.14)* — `{name, email}`, `null` each when unknown
+- `me`  *(0.10.0)* — `{name, email}`, `null` each when unknown
 
-- `recording` *(after 0.9.14)* — `{state, call, stamp}`: `state` is `recording` while Echo records a call or memo, else `transcribing` while a call's transcription runs, else `idle`; `call` and `stamp` are `null` when idle. It has its own line on the sheet
+- `recording`  *(0.10.0)* — `{state, call, stamp}`: `state` is `recording` while Echo records a call or memo, else `transcribing` while a call's transcription runs, else `idle`; `call` and `stamp` are `null` when idle. It has its own line on the sheet
 
 #### `ctx.echo.dictionary.add({ name, synonyms, spellings, kind, client })` — needs `echo.write: dictionary`
 
 Names for one thing into the user's dictionary. Sheet: “Adds names to your Echo dictionary”.
 
-### About me *(after 0.9.14)*
+### About me  *(0.10.0)*
 
 `"uses": { "me": {} }` — Install sheet: “Reads your About me in Echo (Settings → About me): your name and role, the people and terms of your calls, how you like things written and how you work”
 
@@ -1552,11 +1552,11 @@ ctx.slots.add('call.menu', {
 
 - `target` — `{ kind: "call", call }`
 
-- `label` — *(after 0.9.14)* a text, or a synchronous function of the target (`(t) => `Open in ${…}``); one that throws or gives nothing leaves the item out. `calendar.event` and `task.actions` take one too
+- `label` —  *(0.10.0)* a text, or a synchronous function of the target (`(t) => `Open in ${…}``); one that throws or gives nothing leaves the item out. `calendar.event` and `task.actions` take one too
 
 - `call.name` — the call's folder name — how commands and the CLI name it
 
-- `call.stamp` — *(after 0.9.14)* its stamp, `YYYY-MM-DD_HHMMSS`, kept when the call is retitled: key a record by it
+- `call.stamp` —  *(0.10.0)* its stamp, `YYYY-MM-DD_HHMMSS`, kept when the call is retitled: key a record by it
 
 - `call.title, started_at, minutes` — its title, start (ISO) and length in minutes
 
@@ -1568,7 +1568,7 @@ ctx.slots.add('call.menu', {
 
 - `call.meeting` — the invite: subject, attendees
 
-### A chip on a call's row — call.row *(after 0.9.14)*
+### A chip on a call's row — call.row  *(0.10.0)*
 
 The calls list → each call's row, in its second line.
 
@@ -1635,7 +1635,7 @@ ctx.slots.add('thread.profile', {
 
 - `render(thread)` — synchronous HTML; `after(box, thread)` runs once per box drawn afresh. One row per `id`; one that throws is left out
 
-### A row on a client's Profile — client.profile *(after 0.9.14)*
+### A row on a client's Profile — client.profile  *(0.10.0)*
 
 A client → Profile, under its Threads.
 
@@ -1653,7 +1653,7 @@ ctx.slots.add('client.profile', {
 
 - `render`, `after` — as `thread.profile`: synchronous HTML, `after(box, client)` once per box drawn afresh, one row per `id`
 
-### A box on a call's header — call.header *(after 0.9.14)*
+### A box on a call's header — call.header  *(0.10.0)*
 
 A call → its header, before My notes and ⋯.
 
@@ -1682,7 +1682,7 @@ ctx.slots.add('call.header', {
 
 - `after(box, call)` — once per box drawn afresh, again for another call. One per `id`; one that throws is left out and the header drawn without it
 
-### A line while minutes come — call.minutes *(after 0.9.14)*
+### A line while minutes come — call.minutes  *(0.10.0)*
 
 A call → the box that says its minutes are coming.
 
@@ -1789,7 +1789,7 @@ Its address is `#<plugin>:<id>/…`.
 - `ctx.ui.graph.draw(box, key, build, opts)` lays the graph out once per `key` and keeps it across renders.
 - Sizes are relative to the graph — keep them small.
 
-*(after 0.9.14)* `badge()` gives a count, shown on its icon as Threads shows its count (1–99, then "99+"), or `'!'`, Settings' attention mark.
+ *(0.10.0)* `badge()` gives a count, shown on its icon as Threads shows its count (1–99, then "99+"), or `'!'`, Settings' attention mark.
 
 - Anything else shows none.
 - `editing()` true leaves the activity's box as it is on Echo's redraws, with no `render` and no `after`, until it says otherwise.
@@ -1826,44 +1826,44 @@ Each button runs one of the plugin's commands with its `args`. Echo keeps the it
 Runs a command of its host half.
 
 - A promise of what it returned.
-- *(after 0.9.14)* Sent as a POST with `{args, files}` in its body, 4 MB at most ("too much for one plugin call: 4 MB at most")
+-  *(0.10.0)* Sent as a POST with `{args, files}` in its body, 4 MB at most ("too much for one plugin call: 4 MB at most")
 - `files`: handles it was given, the command's own `{files}`.
 
 #### `ctx.listen(type, fn) · listenWindow(type, fn) · onUnload(fn)`
 
 Document events (clicks on its own buttons) removed with the plugin — an update never doubles a click.
 
-- *(after 0.9.14)* `listenWindow`: the same for the window (resize, focus, message)
+-  *(0.10.0)* `listenWindow`: the same for the window (resize, focus, message)
 - `onUnload`: its own cleanup — timers, observers — run first when it is switched off, updated or removed.
 
-#### `ctx.onFileDrop(fn)` *(after 0.9.14)*
+#### `ctx.onFileDrop(fn)` *(0.10.0)*
 
 macOS: files dropped on the window while its activity or its Knowledge tab is shown go to `fn(files)` as [handles](#handles). With no such view shown, or on Windows, a drop is Echo's own.
 
 #### `ctx.ui.style(css) · ctx.ui.stylesheet(path)`
 
-CSS, removed with the plugin. *(after 0.9.14)* `stylesheet` loads a `.css` file of its package by a plain relative path (`styles/view.css`) and resolves once loaded.
+CSS, removed with the plugin.  *(0.10.0)* `stylesheet` loads a `.css` file of its package by a plain relative path (`styles/view.css`) and resolves once loaded.
 
-#### `ctx.ui.patch(el, html)` *(after 0.9.14)*
+#### `ctx.ui.patch(el, html)` *(0.10.0)*
 
 Replaces a box's HTML unless it is what `patch` last wrote there — redrawn the same, its focus, typed text and scroll stay.
 
-#### `ctx.markdown(md, opts) · ctx.markdown.links(md, { detail })` *(after 0.9.14)*
+#### `ctx.markdown(md, opts) · ctx.markdown.links(md, { detail })` *(0.10.0)*
 
 Echo's writer from the window half, async — see [Markdown pages](#markdown).
 
 #### `ctx.where() · ctx.go(hash, { replace }) · ctx.render()`
 
-Where the window is (`{view, section, route}` *(after 0.9.14)* and `recall`: whether Recall is on), going somewhere, and drawing again after its data changed.
+Where the window is (`{view, section, route}` *(0.10.0)* and `recall`: whether Recall is on), going somewhere, and drawing again after its data changed.
 
-- *(after 0.9.14)* `go(hash, { replace: true })` changes the address without a history step, so Back skips it, and the window shows the page as for a real one.
+-  *(0.10.0)* `go(hash, { replace: true })` changes the address without a history step, so Back skips it, and the window shows the page as for a real one.
 - Without it a new step is made, and the hash it is already at only redraws.
 
 #### `ctx.ui`
 
 Echo's helpers: `esc` (escape text for HTML), `notice` (a message in the status line), `copy` (the clipboard, on the user's click, 10,000 characters), `setRow`, `setCard`, `sw`, `ICON`, `relDay`, `ago`, `graph`, `newGraph`, and the ones above.
 
-#### `ctx.ui.sheet(html, { label, onClose }) · ctx.ui.closeSheet()` *(after 0.9.14)*
+#### `ctx.ui.sheet(html, { label, onClose }) · ctx.ui.closeSheet()` *(0.10.0)*
 
 Opens the plugin's HTML in Echo's dialog frame, over the window.
 
@@ -1874,7 +1874,7 @@ Opens the plugin's HTML in Echo's dialog frame, over the window.
 - Closed, the keyboard goes back where it was.
 - Echo's redraws never replace it; the palette and Echo's own dialogs open over it.
 
-#### `ctx.system.reveal(root, path)` — client half · needs `folders` *(after 0.9.14)*
+#### `ctx.system.reveal(root, path)` — client half · needs `folders` *(0.10.0)*
 
 Shows a file or folder of a given folder in Finder or Explorer, selected.
 
@@ -1887,7 +1887,7 @@ Shows a file or folder of a given folder in Finder or Explorer, selected.
 
 Claude Code in a folder it was given, on the user's click — see [Claude Code](#claude); a skill in the user's own Claude Code — see [Skills in the user's Claude Code](#own-skills); Echo's background jobs — see [Echo's background jobs](#jobs).
 
-### Microphone *(after 0.9.14)*
+### Microphone  *(0.10.0)*
 
 `"uses": { "microphone": {} }` — Install sheet: “Hears your microphone in its own view: only after you click there, with Echo's recording sign on while it listens, and never while Echo records a call or a memo; it stops when you leave the view. What it hears can go to the addresses it may reach”
 
@@ -1928,7 +1928,7 @@ Each widget is an entry in `widgets`, up to 24. The install sheet says how many 
   "id": "team-pulse",
   "name": "Team pulse",
   "version": "1.0.0",
-  "echo": ">=0.9.14",
+  "echo": ">=0.10.0",
   "main": "main.js",
   "client": "client.js",
   "widgets": [
@@ -2253,9 +2253,9 @@ A marketplace is a Git repository or a folder with `echo-marketplace.json` at it
 - `echoctl plugin check <folder>` runs an install's checks — manifest, `uses`, widgets, dashboards, skills, scripts, `agent/` — and exits 0, or names each problem by file (`--json`). It needs no data folder, nothing installed and no network. Run it until it passes before you install or publish.
 - `echoctl plugin call <id> <command> '<json>'` runs a command; `echoctl widget show` and `echoctl work show` print what Echo gets.
 - Test against made-up services, never the real ones. In a development build of Echo, `ECHOCTL_TEST_HOSTS="api.example.com=http://127.0.0.1:8080"` sends `ctx.http.fetch` to a host the manifest names to your local fake; made-up `gh` / `git` first on `PATH` answer `ctx.signin.get`.
-- In a debug build, `ECHOCTL_PICK_FOLDER=<dir>` answers the folder picker — *(after 0.9.14)* `ECHOCTL_PICK_FILES=<path>:<path>` the file picker and `ECHOCTL_ASK_ADDRESS=<address>` the address box — and `echoctl plugin emit <event> '<json>'` queues an event for the plugins that hear it.
-- *(after 0.9.14)* In a development build, `ECHOCTL_TEST_GRAPH=http://127.0.0.1:<port>` (or `http://localhost:<port>`) is a fake Microsoft 365. Echo counts as signed in, with a made-up token, and sends every Graph request of `ctx.m365` to that address. It refuses the real sign-in; a value that isn't a local address is no sign-in at all; a release build never reads it. Serve made-up (`acme.example`) mail and a chat from it for `search`, `mailThread` and `chat`.
-- *(after 0.9.14)* On test data, `ctx.claude.installSkill` writes only into the folder `CLAUDE_CONFIG_DIR` names (refused when it isn't set), and `ctx.system.reveal` opens nothing: it is logged.
+- In a debug build, `ECHOCTL_PICK_FOLDER=<dir>` answers the folder picker —  *(0.10.0)* `ECHOCTL_PICK_FILES=<path>:<path>` the file picker and `ECHOCTL_ASK_ADDRESS=<address>` the address box — and `echoctl plugin emit <event> '<json>'` queues an event for the plugins that hear it.
+-  *(0.10.0)* In a development build, `ECHOCTL_TEST_GRAPH=http://127.0.0.1:<port>` (or `http://localhost:<port>`) is a fake Microsoft 365. Echo counts as signed in, with a made-up token, and sends every Graph request of `ctx.m365` to that address. It refuses the real sign-in; a value that isn't a local address is no sign-in at all; a release build never reads it. Serve made-up (`acme.example`) mail and a chat from it for `search`, `mailThread` and `chat`.
+-  *(0.10.0)* On test data, `ctx.claude.installSkill` writes only into the folder `CLAUDE_CONFIG_DIR` names (refused when it isn't set), and `ctx.system.reveal` opens nothing: it is logged.
 - Use made-up data in tests, fixtures and screenshots (`acme.example`) — never a real call, mail or person.
 
 ## Security model
@@ -2320,7 +2320,7 @@ echoctl plugin check <folder>… [--json]       # an install's checks, for autho
 echoctl plugin guide                          # the authoring rules and the API reference
 echoctl plugin mine                           # My plugins: the folder your own go in
 
-# certificates of the addresses you listed (after 0.9.14)
+# certificates of the addresses you listed (0.10.0)
 echoctl plugin certs <id>                     # trusted, and met and refused
 echoctl plugin trust <id> <host:port> [--key sha256//…]
 echoctl plugin untrust <id> <host:port>
@@ -2331,10 +2331,10 @@ echoctl jobs [list]
 # e.g. every=30 night=off model=sonnet; on=on for a routine
 echoctl jobs set <job> key=value…
 echoctl jobs runs <job>  |  jobs routines [--runs <job>]
-echoctl jobs run <plugin>.<routine>           # run a plugin's routine now (after 0.9.14)
+echoctl jobs run <plugin>.<routine>           # run a plugin's routine now (0.10.0)
 echoctl jobs outcome <plugin>.<routine> [--run <run>]   # its answer, changes, sends, log
 
-# Claude's permissions (after 0.9.14)
+# Claude's permissions (0.10.0)
 echoctl config --folder-permissions ask|auto|skip \
   --routine-permissions auto|skip --yolo-permissions auto|skip
 

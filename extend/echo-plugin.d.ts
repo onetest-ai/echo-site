@@ -1,5 +1,5 @@
 // Echo plugins — types for `ctx`, the manifest and what Echo hands a plugin's code.
-// https://echo.onetest.ai/extend/ · Echo 0.9.14; members marked "after 0.9.14" come with the next Echo release.
+// https://echo.onetest.ai/extend/ · Echo 0.10.0; members marked "0.10.0" need Echo 0.10.0 or later ("echo": ">=0.10.0").
 //
 // A plugin is a folder: echo-plugin.json (EchoPluginManifest), a host half (`main`, runs inside Echo) and a client
 // half (`client`, runs in the Echo window). Each half is an ES module exporting `apply(ctx)`:
@@ -20,7 +20,7 @@ export interface EchoPluginManifest {
   name: string
   /** "X.Y.Z" or "X.Y.Z-pre". */
   version: string
-  /** The Echo it needs, e.g. ">=0.9.14". */
+  /** The Echo it needs, e.g. ">=0.10.0". */
   echo?: string
   /** One line for its card, up to 240 characters. */
   summary?: string
@@ -36,7 +36,7 @@ export interface EchoPluginManifest {
   widgets?: WidgetDef[]
   /** Ready-made dashboards it offers, at most 6. */
   dashboards?: DashboardDef[]
-  /** After 0.9.14: Claude Code routines it ships, at most 4 (needs uses.claude); off until the user switches each on. */
+  /** Since 0.10.0: Claude Code routines it ships, at most 4 (needs uses.claude); off until the user switches each on. */
   routines?: RoutineDef[]
   /** Its package skill folders, e.g. ["skills/staffing"] (at most 10 with its runtime skills). */
   skills?: string[]
@@ -68,7 +68,7 @@ export interface Uses {
   /** ctx.deliver.provide for these kinds (never teams or mail). */
   deliver_provider?: { kinds: string[] }
   /** hosts: https to these hosts. hosts_from: string settings (no default) where the user lists addresses.
-   *  ask (after 0.9.14): ctx.http.askAddress. */
+   *  ask (0.10.0): ctx.http.askAddress. */
   network?: { hosts?: string[]; hosts_from?: string[]; ask?: boolean }
   /** ctx.system.pickFolder and ctx.fs; `what` names them on the sheet ("Obsidian vaults"); `write` lets it change them. */
   folders?: { what?: string; write?: boolean }
@@ -76,7 +76,7 @@ export interface Uses {
   files?: { read: string[] }
   /** read: ctx.echo.read kinds; write: what it writes; jobs: Echo's background jobs (client half). */
   echo?: { read?: EchoReadKind[]; write?: Array<'dictionary' | 'thread_stage' | 'tasks'>; jobs?: boolean }
-  /** After 0.9.14: ctx.m365, read-only through Echo's sign-in. */
+  /** Since 0.10.0: ctx.m365, read-only through Echo's sign-in. */
   m365?: { read: Array<'mail' | 'chats'> }
   /** ctx.signin for 1–4 plain host names; keep: Echo keeps a sign-in the plugin makes itself. */
   signin?: { hosts: string[]; keep?: boolean }
@@ -90,17 +90,17 @@ export interface Uses {
   work?: {}
   /** An AI profile it offers: `command` one program name on the user's PATH, `name` ≤ 40. */
   ai?: { wrapper: { name: string; command: string } }
-  /** After 0.9.14: its window half hears the microphone (ctx.microphone). */
+  /** Since 0.10.0: its window half hears the microphone (ctx.microphone). */
   microphone?: {}
-  /** After 0.9.14: its host half reads About me (ctx.me). */
+  /** Since 0.10.0: its host half reads About me (ctx.me). */
   me?: {}
-  /** After 0.9.14: its window half adds skills to the user's own Claude Code, each on a click (ctx.claude.installSkill). */
+  /** Since 0.10.0: its window half adds skills to the user's own Claude Code, each on a click (ctx.claude.installSkill). */
   skills?: boolean
 }
 
 export type EchoReadKind = 'clients' | 'threads' | 'people' | 'dictionary' | 'sources' | 'source' | 'calls' | 'calendar' | 'me' | 'recording'
 
-/** After 0.9.14. On its sheet, off until the user switches it on; its id among Echo's jobs is `<plugin>.<id>`. */
+/** Since 0.10.0. On its sheet, off until the user switches it on; its id among Echo's jobs is `<plugin>.<id>`. */
 export interface RoutineDef {
   /** a–z 0–9 -, ≤ 40, once. */
   id: string
@@ -239,20 +239,20 @@ export interface WidgetAsk {
 // ── events ──────────────────────────────────────────────────────────────────────────────────────────────────────
 
 /** What a plugin may hear (uses.events.on): ids and titles, never what was said. `call` is the call's folder name;
- *  after 0.9.14 `stamp` is the `YYYY-MM-DD_HHMMSS` its folder name starts with, kept when the call is retitled (two calls started
+ *  0.10.0 `stamp` is the `YYYY-MM-DD_HHMMSS` its folder name starts with, kept when the call is retitled (two calls started
  *  in the same second share one). */
 export interface EventPayload {
   meeting_soon: { id: string; subject: string | null; start: string | null; threads: string[] }
   call_started: { app: string }
-  /** After 0.9.14: next_call, true when Teams went straight on to another call. */
+  /** Since 0.10.0: next_call, true when Teams went straight on to another call. */
   call_ended: { app: string; recording: boolean; next_call: boolean }
-  /** After 0.9.14: stamp; title is the arm's, else the meeting's subject. */
+  /** Since 0.10.0: stamp; title is the arm's, else the meeting's subject. */
   recording_started: { call: string; stamp: string; title: string | null; memo: boolean }
-  /** After 0.9.14: stamp; reason is call_ended, user, next_call, computer_slept or watch_stopped. */
+  /** Since 0.10.0: stamp; reason is call_ended, user, next_call, computer_slept or watch_stopped. */
   recording_stopped: { call: string; stamp: string; duration_s: number; reason: 'call_ended' | 'user' | 'next_call' | 'computer_slept' | 'watch_stopped' }
-  /** After 0.9.14: stamp. */
+  /** Since 0.10.0: stamp. */
   transcribed: { call: string; stamp: string; ok: boolean }
-  /** After 0.9.14: the keys after `title`. `revision`: 16 hex characters of the minutes, another when they change; `rewritten`: Echo told
+  /** Since 0.10.0: the keys after `title`. `revision`: 16 hex characters of the minutes, another when they change; `rewritten`: Echo told
    *  this call's minutes before. A plugin that reads sources (uses.echo.read names source or sources) also gets `threads`, `client`,
    *  `profile`, `participants` and `minutes` (without `body`), as echo.read('source') gives them. No transcript or chat. */
   minutes_written: {
@@ -261,7 +261,7 @@ export interface EventPayload {
     threads?: SourceThread[]; client?: { id: string; name: string } | null; profile?: string | null; participants?: Participant[]; minutes?: Omit<CallMinutes, 'body'>
   }
   thread_synced: { thread: string; processed: number; left: number }
-  /** After 0.9.14: readers (a plugin that reads sources) also get `items`, for each changed one (100 at most): what Echo decided when it
+  /** Since 0.10.0: readers (a plugin that reads sources) also get `items`, for each changed one (100 at most): what Echo decided when it
    *  indexed it, never its text. */
   sources_changed: { changed: string[]; removed: string[]; items?: SourceItem[] }
   threads_changed:
@@ -272,7 +272,7 @@ export interface EventPayload {
 }
 export type EventName = keyof EventPayload
 
-/** After 0.9.14: a thread of a source, and the shapes echo.read('source' | 'sources' | 'calls' | 'people' | 'recording') gives. */
+/** Since 0.10.0: a thread of a source, and the shapes echo.read('source' | 'sources' | 'calls' | 'people' | 'recording') gives. */
 export interface SourceThread { id: string; name: string; client: string | null; client_name: string | null }
 export interface Participant { name: string; email?: string; /** Its key in echo.read('people'), or null when Echo doesn't know them. */ person: string | null }
 export interface CallMinutes {
@@ -302,7 +302,7 @@ export interface AboutMe { text: string; parts: Record<string, string>; name: st
 // ── the host half (main.js): runs inside Echo ──────────────────────────────────────────────────────────────────
 // QuickJS, 64 MB shared by all host halves, 5 s of JavaScript between awaits. Promises run outside the slice.
 
-/** A file the user handed the plugin (after 0.9.14): an id of its own, never the path; kept an hour. */
+/** A file the user handed the plugin (0.10.0): an id of its own, never the path; kept an hour. */
 export interface FileHandle { file: string; name: string; size: number }
 
 export interface ClaudeResult {
@@ -323,22 +323,22 @@ export interface ClaudeRun {
   /** An AI profile id; the default when left out (a wrapper only when it is the default). */
   profile?: string
   model?: string
-  /** After 0.9.14: left out, the user's setting for routines; "auto"; "skip" (only with uses.claude.skip);
+  /** Since 0.10.0: left out, the user's setting for routines; "auto"; "skip" (only with uses.claude.skip);
    *  "none" (no tools). "read" and "folder", from before, are taken as "auto". Ignored in a folder run. */
   tools?: 'auto' | 'skip' | 'none' | 'read' | 'folder'
   /** Its working folder, relative to the plugin's store (default runs/<time>). */
   dir?: string
   /** Minutes, 1–60 (default 20). */
   timeout?: number
-  /** After 0.9.14, with uses.folders: a root as ctx.fs.folders() names it — the run is that folder's own project. */
+  /** Since 0.10.0, with uses.folders: a root as ctx.fs.folders() names it — the run is that folder's own project. */
   folder?: string
   /** A subfolder of `folder` ("" the root). */
   path?: string
   /** read (default); edit (needs folders.write); copy (an edit run on a snapshot in its store). */
   mode?: 'read' | 'edit' | 'copy'
-  /** After 0.9.14: 1–64 letters, digits, `.`, `_` or `-` (any case is one key). One run at a time per plugin and key; stop it with ctx.claude.stop. */
+  /** Since 0.10.0: 1–64 letters, digits, `.`, `_` or `-` (any case is one key). One run at a time per plugin and key; stop it with ctx.claude.stop. */
   key?: string
-  /** After 0.9.14, only with mode "copy": paths under the root the snapshot leaves out, 100 at most. */
+  /** Since 0.10.0, only with mode "copy": paths under the root the snapshot leaves out, 100 at most. */
   exclude?: string[]
 }
 
@@ -405,11 +405,11 @@ export interface HttpOpts {
   body?: string | Json
   /** A path in its store to keep the answer in (512 MB, 15 min). */
   save?: string
-  /** After 0.9.14: a handed file sent as the body with POST, PUT or PATCH (512 MB, 15 min). */
+  /** Since 0.10.0: a handed file sent as the body with POST, PUT or PATCH (512 MB, 15 min). */
   file?: FileHandle | string
 }
 
-/** After 0.9.14: what ctx.web.read gives. */
+/** Since 0.10.0: what ctx.web.read gives. */
 export interface WebPage {
   url: string; title: string; markdown: string
   /** Absolute http(s) links of the main part, each once (2,000 at most). */
@@ -432,7 +432,7 @@ export interface HostContext {
   /** A line in Echo's log. */
   log(...args: unknown[]): void
   /** A command the client half (ctx.call), an Inbox button, a widget action or `echoctl plugin call` runs. A window call has 30 s.
-   *  `files` (after 0.9.14): the handles its caller passed. */
+   *  `files` (0.10.0): the handles its caller passed. */
   command(name: string, fn: (args: Record<string, Json>, ctx: { files: FileHandle[] }) => Json | void | Promise<Json | void>): void
   /** Every `seconds` (at least 10) while Echo runs. Needs uses.schedule. */
   every(seconds: number, fn: () => void | Promise<void>): void
@@ -440,17 +440,17 @@ export interface HostContext {
   on<E extends EventName>(event: E, fn: (payload: EventPayload[E]) => void | Promise<void>): Promise<true>
   /** Text files in its own folder in the data folder; relative paths only. Every write takes its lock across processes. */
   store: {
-    /** After 0.9.14: it throws on a file that isn't UTF-8; {lossy: true} gives it with those bytes as U+FFFD. */
+    /** Since 0.10.0: it throws on a file that isn't UTF-8; {lossy: true} gives it with those bytes as U+FFFD. */
     read(path: string, opts?: { lossy?: boolean }): string | null
-    /** After 0.9.14: {ifSha} only while the file's sha256 is still that; {createNew} only where no file is. */
+    /** Since 0.10.0: {ifSha} only while the file's sha256 is still that; {createNew} only where no file is. */
     write(path: string, text: string, opts?: { ifSha?: string; createNew?: boolean }): void
-    /** After 0.9.14: read, fn, write only over what was read (fn may run again); → the text kept. */
+    /** Since 0.10.0: read, fn, write only over what was read (fn may run again); → the text kept. */
     update(path: string, fn: (text: string | null) => string | null | undefined): string | null
     list(dir?: string): string[]
     remove(path: string): void
     /** The absolute path of a file in it. */
     path(path?: string): string
-    /** After 0.9.14: the files under a folder of its store ("" the store), paths relative to it; 20,000 rows by default, 100,000 at most;
+    /** Since 0.10.0: the files under a folder of its store ("" the store), paths relative to it; 20,000 rows by default, 100,000 at most;
      *  `sha` for files up to 64 MB; a folder that isn't there gives []. */
     walk(path: string, opts?: { ext?: string[]; hidden?: boolean; max?: number; sha?: boolean }): Promise<Array<{ path: string; size: number; mtime: number; sha?: string }>>
     /** What it keeps there (its own files only). */
@@ -458,7 +458,7 @@ export interface HostContext {
   }
   /** Its cache/ (Echo removes what is there over 7 days). */
   cache: { size(): { bytes: number; files: number } }
-  /** After 0.9.14. */
+  /** Since 0.10.0. */
   crypto: { sha256(text: string): string }
   /** Its manifest's settings. */
   settings: { get(key: string): Json; set(key: string, value: Json): void }
@@ -467,16 +467,16 @@ export interface HostContext {
   http: {
     /** Needs uses.network: https to its hosts, the addresses the user listed, or the one typed address. 60 s, 10 MB. */
     fetch(url: string, opts?: HttpOpts): Promise<{ status: number; body: string }>
-    /** After 0.9.14: an answer as it comes (SSE, chunked); no time limit, 512 MB. */
+    /** Since 0.10.0: an answer as it comes (SSE, chunked); no time limit, 512 MB. */
     stream(url: string, opts: Omit<HttpOpts, 'save'> | undefined, onChunk: (text: string, s: HttpStream) => void): HttpStream
-    /** After 0.9.14, uses.network.ask: Echo's own box asks the user for an address; that one may be fetched once (GET). */
+    /** Since 0.10.0, uses.network.ask: Echo's own box asks the user for an address; that one may be fetched once (GET). */
     askAddress(): Promise<string | null>
   }
-  /** After 0.9.14: ws:// and wss:// to an address the user listed. */
+  /** Since 0.10.0: ws:// and wss:// to an address the user listed. */
   net: { websocket(url: string, opts?: { headers?: Record<string, string>; protocols?: string[] }): Promise<WebSocketConn> }
-  /** Echo's safe Markdown writer. With opts (after 0.9.14): a vault page with wikilinks and images, 2 MB at most. */
+  /** Echo's safe Markdown writer. With opts (0.10.0): a vault page with wikilinks and images, 2 MB at most. */
   markdown: ((md: string, opts?: MarkdownOpts) => string) & {
-    /** After 0.9.14: what to resolve first, each destination once as written. `detail: true` adds `entries`: each way it was written. */
+    /** Since 0.10.0: what to resolve first, each destination once as written. `detail: true` adds `entries`: each way it was written. */
     links(md: string, opts?: { detail?: boolean }): { links: string[]; images: string[]; entries?: Array<{ dest: string; kind: 'wiki' | 'md'; embed: boolean }> }
   }
   /** A system notification from Echo. */
@@ -488,7 +488,7 @@ export interface HostContext {
   claude: {
     /** Needs uses.claude; a folder run also uses.folders. */
     run(opts: ClaudeRun): Promise<ClaudeResult>
-    /** After 0.9.14: stops the plugin's own run under that key (Claude Code and everything it started). true; false when none runs.
+    /** Since 0.10.0: stops the plugin's own run under that key (Claude Code and everything it started). true; false when none runs.
      *  The stopped `run` fails with the message "stopped". */
     stop(key: string): Promise<boolean>
     /** Is the channel plugin uses.channel names installed for the default profile? */
@@ -510,36 +510,36 @@ export interface HostContext {
   /** What changes at run time for Claude in Echo (needs `agent` in the manifest); replaces all. */
   agent: { set(part: { summary?: string; entries: Array<{ name: string; summary: string; guide: string }> }): void }
   echo: {
-    /** Read-only, kinds in uses.echo.read. calls, calendar, me, and the richer source: after 0.9.14. */
+    /** Read-only, kinds in uses.echo.read. calls, calendar, me, and the richer source: 0.10.0. */
     read(kind: 'clients' | 'threads' | 'dictionary' | 'me'): Json
-    /** After 0.9.14: {key, name, aliases, email, also, organisation, client, title, threads, link} of everyone in the open threads. */
+    /** Since 0.10.0: {key, name, aliases, email, also, organisation, client, title, threads, link} of everyone in the open threads. */
     read(kind: 'people'): PersonRow[]
-    /** After 0.9.14: `from` / `to` YYYY-MM-DD by the start's day in the user's time zone, both days in; each meeting also has `client`. */
+    /** Since 0.10.0: `from` / `to` YYYY-MM-DD by the start's day in the user's time zone, both days in; each meeting also has `client`. */
     read(kind: 'calendar', opts?: { from?: string; to?: string }): Json
-    /** After 0.9.14: `client`, `q`; newest first, no text; limit 200 (1,000 at most). */
+    /** Since 0.10.0: `client`, `q`; newest first, no text; limit 200 (1,000 at most). */
     read(kind: 'sources', opts?: { kind?: 'call' | 'mail' | 'channel'; thread?: string; client?: string; q?: string; since?: string; limit?: number }): Json
-    /** 'call:<folder>', after 0.9.14 'call:<stamp>', or 'mail:<source>'. A call also has stamp, started_at, ended_at, duration_min, app, platform,
+    /** 'call:<folder>', 0.10.0 'call:<stamp>', or 'mail:<source>'. A call also has stamp, started_at, ended_at, duration_min, app, platform,
      *  memo, attendees, participants, minutes (CallMinutes), transcript and chat; a mail or post also what Echo decided (subject, at, from,
      *  people, trust, url, m365_id, conversation_id, messages). `client` is {id, name} when the threads have one client between them. */
     read(kind: 'source', id: string, opts?: { transcript?: boolean; chat?: boolean }): Json
-    /** After 0.9.14: `until`, `thread`, `client`; each call also has stamp, duration_min, app, participants, client. limit 50 (500 at most). */
+    /** Since 0.10.0: `until`, `thread`, `client`; each call also has stamp, duration_min, app, participants, client. limit 50 (500 at most). */
     read(kind: 'calls', opts?: { q?: string; since?: string; until?: string; thread?: string; client?: string; limit?: number }): Json
-    /** After 0.9.14: whether Echo is recording or transcribing a call now (uses.echo.read: recording). */
+    /** Since 0.10.0: whether Echo is recording or transcribing a call now (uses.echo.read: recording). */
     read(kind: 'recording'): { state: 'recording' | 'transcribing' | 'idle'; call: string | null; stamp: string | null }
     /** uses.echo.write: dictionary. */
     dictionary: { add(term: { name: string; synonyms?: string[]; spellings?: string[]; kind?: string; client?: string }): Json }
   }
-  /** After 0.9.14, uses.me: what the user wrote in Settings → About me, in the parts asked (none: all but `patterns`);
+  /** Since 0.10.0, uses.me: what the user wrote in Settings → About me, in the parts asked (none: all but `patterns`);
    *  null when it is missing, empty or still the template. 20,000 characters at most. No event: read it when needed. */
   me(opts?: { kinds?: Array<'identity' | 'people' | 'terms' | 'style' | 'patterns'> }): Promise<AboutMe | null>
-  /** After 0.9.14: the plugin's own values per client, by a client's id (no grant): the twin of ctx.threads, same limits
+  /** Since 0.10.0: the plugin's own values per client, by a client's id (no grant): the twin of ctx.threads, same limits
    *  (key 1–80 chars, JSON ≤ 16 KB, 64 keys a client, 4 MB in all). null removes; a key with a dot is refused; a client that isn't there is refused. */
   clients: {
     get(client: string, key: string): Json
     set(client: string, key: string, value: Json): void
     list(key: string): Array<{ client: string; value: Json }>
   }
-  /** After 0.9.14: read a web page as safe Markdown. No capability of its own: a GET under the network grants (named host, listed
+  /** Since 0.10.0: read a web page as safe Markdown. No capability of its own: a GET under the network grants (named host, listed
    *  address, or the typed page), no redirect followed. What comes back is untrusted: show it only through ctx.markdown. */
   web: {
     /** HTML only, 5 MB (`max` less), 30 s (`timeout` less). `images: 'save'` also downloads its pictures (50, 10 MB each) into cache/web/;
@@ -571,30 +571,30 @@ export interface HostContext {
     folders(): string[]
     forget(root: string): void
     list(root: string, path?: string): Array<{ name: string; dir: boolean }>
-    /** Up to `max` bytes (default 1 MB, at most 4 MB). Bytes that aren't UTF-8 come as U+FFFD; after 0.9.14 `strict: true` throws "not UTF-8: <path>" instead. */
+    /** Up to `max` bytes (default 1 MB, at most 4 MB). Bytes that aren't UTF-8 come as U+FFFD; 0.10.0 `strict: true` throws "not UTF-8: <path>" instead. */
     read(root: string, path: string, max?: number | { max?: number; strict?: boolean }): string
-    /** After 0.9.14 `strict`: null also for a file that isn't UTF-8. 5,000 paths at most. */
+    /** Since 0.10.0 `strict`: null also for a file that isn't UTF-8. 5,000 paths at most. */
     readMany(root: string, paths: string[], max?: number | { max?: number; strict?: boolean }): Promise<Array<string | null>>
-    /** `sha` (after 0.9.14): each file's sha256, up to 64 MB. */
+    /** `sha` (0.10.0): each file's sha256, up to 64 MB. */
     walk(root: string, opts?: { path?: string; ext?: string[]; hidden?: boolean; max?: number; sha?: boolean }): Promise<Array<{ path: string; size: number; mtime: number; sha?: string }>>
-    /** After 0.9.14. */
+    /** Since 0.10.0. */
     stat(root: string, path: string, opts?: { sha?: boolean }): FsStat | null
-    /** After 0.9.14: lines holding `query` as typed. */
+    /** Since 0.10.0: lines holding `query` as typed. */
     search(root: string, query: string, opts?: { path?: string; ext?: string[]; hidden?: boolean; max?: number; caseSensitive?: boolean }): Promise<Array<{ path: string; line: number; text: string }>>
-    /** After 0.9.14: a copy in its store's cache/snapshots/. */
+    /** Since 0.10.0: a copy in its store's cache/snapshots/. */
     snapshot(root: string, opts?: { exclude?: string[]; hidden?: boolean; maxFiles?: number; maxBytes?: number }): Promise<Snapshot>
-    /** ifSha / createNew after 0.9.14. */
+    /** ifSha / createNew 0.10.0. */
     write(root: string, path: string, text: string, opts?: { ifSha?: string | null; createNew?: boolean }): void
-    /** After 0.9.14. */
+    /** Since 0.10.0. */
     append(root: string, path: string, text: string): void
-    /** After 0.9.14. */
+    /** Since 0.10.0. */
     mkdir(root: string, path: string): void
     move(root: string, from: string, to: string): void
     remove(root: string, path: string): void
-    /** After 0.9.14: a handed file's bytes into a granted folder (50 MB), never over a file unless createNew: false. */
+    /** Since 0.10.0: a handed file's bytes into a granted folder (50 MB), never over a file unless createNew: false. */
     copyIn(file: FileHandle | string, root: string, path: string, opts?: { createNew?: boolean }): Promise<{ path: string; size: number }>
   }
-  /** After 0.9.14: git in a folder it was given; init and commit need folders.write. */
+  /** Since 0.10.0: git in a folder it was given; init and commit need folders.write. */
   git: {
     info(root: string): Promise<{ repo: false } | { repo: true; branch: string | null; head: string | null; detached: boolean; busy: 'merge' | 'rebase' | 'cherry-pick' | 'revert' | 'bisect' | null; subfolder: boolean }>
     status(root: string, opts?: { paths?: string[] }): Promise<Array<{ path: string; code: string; from?: string }>>
@@ -603,9 +603,9 @@ export interface HostContext {
     init(root: string, opts?: { branch?: string }): Promise<Json>
     commit(root: string, opts: { paths: string[]; message: string }): Promise<{ rev: string | null }>
   }
-  /** After 0.9.14: files the user handed it. */
+  /** Since 0.10.0: files the user handed it. */
   files: { read(file: FileHandle | string, opts?: { max?: number }): string }
-  /** After 0.9.14, uses.m365.read: through Echo's sign-in, read-only. */
+  /** Since 0.10.0, uses.m365.read: through Echo's sign-in, read-only. */
   m365: {
     search(query: string, opts?: { kinds?: string[]; days?: number; limit?: number }): Promise<{ query: string; results: Json; errors: Json }>
     mailThread(message: string): Promise<{ subject: string; picked: Json; messages: Json[] }>
@@ -617,7 +617,7 @@ export interface HostContext {
     readFile(entry: string): string | null
     /** The system's folder picker; the folder picked is given to the plugin. Needs uses.folders. */
     pickFolder(prompt?: string): Promise<string | null>
-    /** After 0.9.14: the system's file picker → handles ([] cancelled); only from a command. */
+    /** Since 0.10.0: the system's file picker → handles ([] cancelled); only from a command. */
     pickFiles(prompt?: string, opts?: { multiple?: boolean; ext?: string[] }): Promise<FileHandle[]>
   }
   /** uses.signin. */
@@ -672,7 +672,7 @@ export interface SlotTargets {
 
 /** A button in calendar.event, call.menu or task.actions. */
 export interface SlotItem<S extends keyof SlotTargets> {
-  /** A text, or after 0.9.14 a synchronous function of the target (one that throws or gives nothing leaves the item out). */
+  /** A text, or 0.10.0 a synchronous function of the target (one that throws or gives nothing leaves the item out). */
   label: string | ((target: SlotTargets[S]) => string | null | undefined)
   /** An SVG string before the label. */
   icon?: string
@@ -694,7 +694,7 @@ export interface ThreadProfileItem {
   after?(box: HTMLElement, thread: { id: string; name: string; client: string | null }): void
 }
 
-/** After 0.9.14: a row on a client's Profile, under its Threads. As ThreadProfileItem. */
+/** Since 0.10.0: a row on a client's Profile, under its Threads. As ThreadProfileItem. */
 export interface ClientProfileItem {
   id: string
   label: string
@@ -720,7 +720,7 @@ export interface SlotCall {
   client: string | null
 }
 
-/** After 0.9.14: a box of the plugin's own on a call's header, before My notes and ⋯. The box is `position: relative`. */
+/** Since 0.10.0: a box of the plugin's own on a call's header, before My notes and ⋯. The box is `position: relative`. */
 export interface CallHeaderItem {
   id: string
   label: string
@@ -730,7 +730,7 @@ export interface CallHeaderItem {
   after?(box: HTMLElement, call: SlotCall): void
 }
 
-/** After 0.9.14: a line in the box that says a call's minutes are coming; drawn only while they are. */
+/** Since 0.10.0: a line in the box that says a call's minutes are coming; drawn only while they are. */
 export interface CallMinutesItem {
   id: string
   label: string
@@ -738,7 +738,7 @@ export interface CallMinutesItem {
   render(call: SlotCall): string
 }
 
-/** After 0.9.14: a chip on each call's row. */
+/** Since 0.10.0: a chip on each call's row. */
 export interface CallRowItem {
   id: string
   /** The chip's tooltip. */
@@ -773,7 +773,7 @@ export interface CalendarEvent {
 export interface Call {
   /** The call's folder name: how commands and the CLI name it. */
   name: string
-  /** After 0.9.14: `YYYY-MM-DD_HHMMSS`, kept when the call is retitled. */
+  /** Since 0.10.0: `YYYY-MM-DD_HHMMSS`, kept when the call is retitled. */
   stamp: string
   title: string
   started_at: string
@@ -807,17 +807,17 @@ export type PaletteTarget = { kind: 'call'; c: Call; label: string } | { kind: '
 
 export interface ClientContext {
   id: string
-  /** Run a command of its host half. After 0.9.14: a POST of {args, files}, 4 MB at most; `files` handles it was given. */
+  /** Run a command of its host half. Since 0.10.0: a POST of {args, files}, 4 MB at most; `files` handles it was given. */
   call(command: string, args?: Record<string, Json>, opts?: { files?: Array<FileHandle | string> }): Promise<Json>
   /** A document listener removed with the plugin. */
   listen(type: string, fn: (e: Event) => void, opts?: AddEventListenerOptions): void
-  /** After 0.9.14: a window listener removed with the plugin. */
+  /** Since 0.10.0: a window listener removed with the plugin. */
   listenWindow(type: string, fn: (e: Event) => void, opts?: AddEventListenerOptions): void
-  /** After 0.9.14: its own cleanup, run first when it unloads. */
+  /** Since 0.10.0: its own cleanup, run first when it unloads. */
   onUnload(fn: () => void): void
-  /** After 0.9.14, macOS: files dropped while its activity or Knowledge tab is shown. */
+  /** Since 0.10.0, macOS: files dropped while its activity or Knowledge tab is shown. */
   onFileDrop(fn: (files: FileHandle[]) => void): void
-  /** After 0.9.14: Echo's writer from the window, async. */
+  /** Since 0.10.0: Echo's writer from the window, async. */
   markdown: ((md: string, opts?: MarkdownOpts) => Promise<string>) & { links(md: string, opts?: { detail?: boolean }): Promise<{ links: string[]; images: string[]; entries?: Array<{ dest: string; kind: 'wiki' | 'md'; embed: boolean }> }> }
   slots: {
     list(): Slot[]
@@ -850,9 +850,9 @@ export interface ClientContext {
     /** A page of its own in the left bar; address #<plugin>:<id>/<its route>. after(box) runs after each render. */
     add(a: {
       id: string; label: string; icon?: string; render(): string; after?(box: HTMLElement): void
-      /** After 0.9.14: a count shown on its icon (1–99, then "99+"), or '!' (Settings' attention mark); anything else shows none. Synchronous. */
+      /** Since 0.10.0: a count shown on its icon (1–99, then "99+"), or '!' (Settings' attention mark); anything else shows none. Synchronous. */
       badge?(): number | string | null | undefined
-      /** After 0.9.14: true leaves the activity's box as it is on Echo's redraws, until it says otherwise. Synchronous. */
+      /** Since 0.10.0: true leaves the activity's box as it is on Echo's redraws, until it says otherwise. Synchronous. */
       editing?(): boolean
     }): void
   }
@@ -860,18 +860,18 @@ export interface ClientContext {
     add(item: { label: string; group?: string; keywords?: string; run(target: PaletteTarget): unknown }): void
   }
   claude: {
-    /** After 0.9.14, uses.claude + uses.folders: Claude Code in a folder it was given, in Echo's terminal, on the user's
+    /** Since 0.10.0, uses.claude + uses.folders: Claude Code in a folder it was given, in Echo's terminal, on the user's
      *  click or key (else it throws). The user's session: the plugin can't type into it or read it. */
     session(opts: { folder: string; path?: string; mode?: 'read' | 'edit'; profile?: string }): void
-    /** After 0.9.14, uses.skills, only on the user's click or key: a skill in the user's own Claude Code (`~/.claude/skills/<name>/SKILL.md`).
+    /** Since 0.10.0, uses.skills, only on the user's click or key: a skill in the user's own Claude Code (`~/.claude/skills/<name>/SKILL.md`).
      *  `name` 1–64 of a-z, 0-9, `-`; `md` the whole SKILL.md, 256 KB at most, a skill that runs nothing (frontmatter only name, description,
      *  when_to_use, argument-hint, disable-model-invocation, user-invocable; no `!` commands). Never over a skill that is there already
      *  unless this plugin added it; removing the plugin takes out every skill it added. */
     installSkill(name: string, md: string): Promise<true>
-    /** After 0.9.14: takes out only a skill this plugin added. */
+    /** Since 0.10.0: takes out only a skill this plugin added. */
     removeSkill(name: string): Promise<true>
   }
-  /** After 0.9.14, uses.folders, only on the user's click or key: shows a file or folder of a given folder in Finder / Explorer. */
+  /** Since 0.10.0, uses.folders, only on the user's click or key: shows a file or folder of a given folder in Finder / Explorer. */
   system: { reveal(root: string, path: string): Promise<true> }
   echo: {
     /** uses.echo.jobs: Echo's background jobs. */
@@ -887,16 +887,16 @@ export interface ClientContext {
       runs(id: string, opts?: { limit?: number }): Promise<Json[]>
     }
   }
-  /** After 0.9.14, uses.microphone: only on the user's click in its own view, never while Echo records. */
+  /** Since 0.10.0, uses.microphone: only on the user's click in its own view, never while Echo records. */
   microphone: {
     open(audio?: boolean | MediaTrackConstraints): Promise<MediaStream>
     close(): void
     isOpen(): boolean
   }
   /** Where the window is. */
-  /** `recall` after 0.9.14: whether Recall is on. */
+  /** `recall` 0.10.0: whether Recall is on. */
   where(): { view: string; section: string; route: string; tab?: string; recall?: boolean }
-  /** After 0.9.14 `replace: true`: the address changes without a history step (Back skips it); the hash it is already at only redraws. */
+  /** Since 0.10.0 `replace: true`: the address changes without a history step (Back skips it); the hash it is already at only redraws. */
   go(hash: string, opts?: { replace?: boolean }): void
   /** Draw the window again after its data changed. */
   render(): void
@@ -905,14 +905,14 @@ export interface ClientContext {
     esc(s: string): string
     /** Its CSS, removed with the plugin. */
     style(css: string): void
-    /** After 0.9.14: a .css file of its package by a plain relative path, resolved once loaded. */
+    /** Since 0.10.0: a .css file of its package by a plain relative path, resolved once loaded. */
     stylesheet(path: string): Promise<void>
-    /** After 0.9.14: replace a box's HTML unless it is what patch last wrote there (focus, typed text and scroll stay). */
+    /** Since 0.10.0: replace a box's HTML unless it is what patch last wrote there (focus, typed text and scroll stay). */
     patch(el: HTMLElement, html: string): void
-    /** After 0.9.14: the plugin's HTML in Echo's dialog frame over the window; returns the sheet's box. One at a time. Esc, a click beside it
+    /** Since 0.10.0: the plugin's HTML in Echo's dialog frame over the window; returns the sheet's box. One at a time. Esc, a click beside it
      *  or closeSheet() close it and call onClose once. */
     sheet(html: string, opts?: { label?: string; onClose?: () => void }): HTMLElement
-    /** After 0.9.14: closes the plugin's own sheet. */
+    /** Since 0.10.0: closes the plugin's own sheet. */
     closeSheet(): void
     /** The clipboard, on the user's click or key (else it throws); 10,000 characters at most. */
     copy(text: string): void

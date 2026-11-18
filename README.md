@@ -27,7 +27,7 @@ The plugin guide (`extend/index.html`) and the install guide follow these conven
 - Then bullets (`<ul class="rules">`), one fact each; no semicolon chains, no paragraph longer than 2-3 lines.
 - Name the blocks with a small label (`<p class="lbl">`): Options, Gives, Refused, Limits, Example.
 - Options and their meanings go in a `<dl class="gets">`; long shapes go in a list or a code block, not mid-sentence.
-- Mark what is not in the released Echo with `<span class="new">after X.Y.Z</span>`.
+- Mark what is new in a release with `<span class="new">X.Y.Z</span>`; what is not released yet with `<span class="new">after X.Y.Z</span>` (X.Y.Z the latest release).
 - Code examples sit in `<pre class="code">`; they wrap, so keep lines short anyway.
 - Use made-up data (`acme.example`), never a real call, mail or person.
 - After an edit run `python3 tools/html2md.py` (never edit `extend/index.md`), and keep `extend/echo-plugin.d.ts` and `llms.txt` in step.
