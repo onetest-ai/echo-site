@@ -68,8 +68,10 @@ export interface Uses {
   /** ctx.deliver.provide for these kinds (never teams or mail). */
   deliver_provider?: { kinds: string[] }
   /** hosts: https to these hosts. hosts_from: string settings (no default) where the user lists addresses.
-   *  ask (0.10.0): ctx.http.askAddress. */
-  network?: { hosts?: string[]; hosts_from?: string[]; ask?: boolean }
+   *  ask (0.10.0): ctx.http.askAddress.
+   *  web (0.10.3): ctx.web.read and ctx.web.fetch reach any https page on the public internet (a line of its own on the sheet:
+   *  "Reads web pages on the public internet (https), and can send what it knows to any site through the addresses it opens"). */
+  network?: { hosts?: string[]; hosts_from?: string[]; ask?: boolean; web?: boolean }
   /** ctx.system.pickFolder and ctx.fs; `what` names them on the sheet ("Obsidian vaults"); `write` lets it change them. */
   folders?: { what?: string; write?: boolean }
   /** ctx.system.readFile for 1–5 files of other apps, each named in full (~/…, %APPDATA%/…, %LOCALAPPDATA%/…). */
@@ -96,6 +98,8 @@ export interface Uses {
   me?: {}
   /** Since 0.10.0: its window half adds skills to the user's own Claude Code, each on a click (ctx.claude.installSkill). */
   skills?: boolean
+  /** Since 0.10.3: its host half transcribes audio files it was handed (ctx.speech.transcribe). */
+  speech?: boolean
 }
 
 export type EchoReadKind = 'clients' | 'threads' | 'people' | 'dictionary' | 'sources' | 'source' | 'calls' | 'calendar' | 'me' | 'recording'
@@ -296,6 +300,12 @@ export interface SourceItem {
 export interface PersonRow {
   key: string; name: string; aliases: string[]; email: string | null; also: string[]; organisation: string | null; client: string | null
   title: string | null; threads: string[]; link: string
+  /** Since 0.10.1: where they stand in each of their open threads (role and stance as People keeps them, null when unset). */
+  places: Array<{ thread: string; role: string | null; stance: string | null }>
+  /** Since 0.10.1: the listed person they report to (key null when People doesn't list them), else null. */
+  reports_to: { key: string | null; name: string } | null
+  /** Since 0.10.1: the listed people who report to them (never themselves). */
+  reports: Array<{ key: string; name: string }>
 }
 export interface AboutMe { text: string; parts: Record<string, string>; name: string | null; /** 8 hex characters of `text`: another one, an edit to read again. */ hash: string }
 
@@ -340,6 +350,16 @@ export interface ClaudeRun {
   key?: string
   /** Since 0.10.0, only with mode "copy": paths under the root the snapshot leaves out, 100 at most. */
   exclude?: string[]
+  /** Since 0.10.3: handles of files handed to the plugin, 10 at most, each a PNG, JPEG, GIF or WebP (by its first bytes) of 3.75 MB at most,
+   *  all of them 15 MB base64-encoded at most; else refused before Claude Code starts. Every mode, tools "none" too. */
+  images?: Array<FileHandle | string>
+  /** Since 0.10.3: Claude's own text as it comes (not a subagent's), in order, all before the promise settles. A chunk may hold several deltas.
+   *  An error it throws is logged and the run goes on. */
+  onText?: (chunk: string) => void
+  /** Since 0.10.3: a conversation, 1–64 letters, digits, `.`, `_` or `-` (any case is one). Its next run continues the Claude Code session;
+   *  kept to the AI profile and folder it began on; one run at a time; not with mode "copy". A conversation past 20 pictures or 15 MB
+   *  base64-encoded is refused. End it with ctx.claude.forget. */
+  resume?: string
 }
 
 export interface Snapshot { path: string; files: number; bytes: number; skipped: number; why: { large: number; unreadable: number } }
@@ -432,7 +452,10 @@ export interface HostContext {
   /** A line in Echo's log. */
   log(...args: unknown[]): void
   /** A command the client half (ctx.call), an Inbox button, a widget action or `echoctl plugin call` runs. A window call has 30 s.
-   *  `files` (0.10.0): the handles its caller passed. */
+   *  `files` (0.10.0): the handles its caller passed.
+   *  0.10.3: a command named `__testSettings` answers a settings page's "Test connection": it gets `{section}`, reads what it needs with
+   *  ctx.settings.get, and answers true, a message or `{ok, message}`; the window half runs it with ctx.call('__testSettings', {section})
+   *  and is given only `{ok, message}` (message cut at 300 characters, the user's secret values replaced by ••••, URLs without query). */
   command(name: string, fn: (args: Record<string, Json>, ctx: { files: FileHandle[] }) => Json | void | Promise<Json | void>): void
   /** Every `seconds` (at least 10) while Echo runs. Needs uses.schedule. */
   every(seconds: number, fn: () => void | Promise<void>): void
@@ -455,12 +478,18 @@ export interface HostContext {
     walk(path: string, opts?: { ext?: string[]; hidden?: boolean; max?: number; sha?: boolean }): Promise<Array<{ path: string; size: number; mtime: number; sha?: string }>>
     /** What it keeps there (its own files only). */
     size(dir?: string): { bytes: number; files: number }
+    /** Since 0.10.3: the same as size. */
+    usage(dir?: string): { bytes: number; files: number }
+    /** Since 0.10.3: a handed file's bytes into its store (50 MB at most), by the store's path rules; never over a file unless createNew: false
+     *  (createNew is true by default). */
+    copyIn(file: FileHandle | string, path: string, opts?: { createNew?: boolean }): Promise<{ path: string; size: number }>
   }
   /** Its cache/ (Echo removes what is there over 7 days). */
   cache: { size(): { bytes: number; files: number } }
   /** Since 0.10.0. */
   crypto: { sha256(text: string): string }
-  /** Its manifest's settings. */
+  /** Its manifest's settings. Since 0.10.3 `get` gives the setting's manifest `default` while the user hasn't set it (else null);
+   *  never a default for a `secret` or an address list the plugin may reach. `get(key) ?? fallback` now gets the default, not the fallback. */
   settings: { get(key: string): Json; set(key: string, value: Json): void }
   /** Its own installed files, read-only. */
   package: { read(path: string): string | null; list(dir?: string): string[] }
@@ -491,6 +520,9 @@ export interface HostContext {
     /** Since 0.10.0: stops the plugin's own run under that key (Claude Code and everything it started). true; false when none runs.
      *  The stopped `run` fails with the message "stopped". */
     stop(key: string): Promise<boolean>
+    /** Since 0.10.3: forgets the conversation `resume` names and removes its Claude Code transcript. true; false when there was none.
+     *  Refused while a run of it goes on. Needs uses.claude. */
+    forget(resume: string): Promise<boolean>
     /** Is the channel plugin uses.channel names installed for the default profile? */
     hasPlugin(spec: string, profile?: string): Promise<Json>
     /** Install it at the default profile's user scope; only that spec. */
@@ -511,8 +543,12 @@ export interface HostContext {
   agent: { set(part: { summary?: string; entries: Array<{ name: string; summary: string; guide: string }> }): void }
   echo: {
     /** Read-only, kinds in uses.echo.read. calls, calendar, me, and the richer source: 0.10.0. */
-    read(kind: 'clients' | 'threads' | 'dictionary' | 'me'): Json
-    /** Since 0.10.0: {key, name, aliases, email, also, organisation, client, title, threads, link} of everyone in the open threads. */
+    read(kind: 'clients' | 'dictionary' | 'me'): Json
+    /** An open thread: {id, name, client, stage, group, profile}; `profile` (0.10.1) is the id of the AI profile its jobs and sync run on:
+     *  the one pinned to it, else the default's. */
+    read(kind: 'threads'): Json
+    /** Since 0.10.0: {key, name, aliases, email, also, organisation, client, title, threads, link} of everyone in the open threads;
+     *  0.10.1: also places, reports_to and reports. */
     read(kind: 'people'): PersonRow[]
     /** Since 0.10.0: `from` / `to` YYYY-MM-DD by the start's day in the user's time zone, both days in; each meeting also has `client`. */
     read(kind: 'calendar', opts?: { from?: string; to?: string }): Json
@@ -539,8 +575,9 @@ export interface HostContext {
     set(client: string, key: string, value: Json): void
     list(key: string): Array<{ client: string; value: Json }>
   }
-  /** Since 0.10.0: read a web page as safe Markdown. No capability of its own: a GET under the network grants (named host, listed
-   *  address, or the typed page), no redirect followed. What comes back is untrusted: show it only through ctx.markdown. */
+  /** Since 0.10.0: read a web page as safe Markdown: a GET under the network grants (named host, listed address, or the typed page),
+   *  no redirect followed. Since 0.10.3, with uses.network.web: any https page on the public internet (port 80 or 443, public
+   *  addresses only), up to 5 redirects, each checked again. What comes back is untrusted: show it only through ctx.markdown. */
   web: {
     /** HTML only, 5 MB (`max` less), 30 s (`timeout` less). `images: 'save'` also downloads its pictures (50, 10 MB each) into cache/web/;
      *  a picture may come from any public host (the one widening: GET, https, port 80 or 443, a public address only). */
@@ -604,7 +641,21 @@ export interface HostContext {
     commit(root: string, opts: { paths: string[]; message: string }): Promise<{ rev: string | null }>
   }
   /** Since 0.10.0: files the user handed it. */
-  files: { read(file: FileHandle | string, opts?: { max?: number }): string }
+  files: {
+    read(file: FileHandle | string, opts?: { max?: number }): string
+    /** Since 0.10.3: the text of a PDF, Word, PowerPoint or spreadsheet file, HTML, Markdown or plain text, by Echo's own readers (no model, no
+     *  network). `pages`: a number or a range ("2-5", "7-") of a PDF or deck. `pages` in the answer is the page count, null for a file
+     *  without pages. 1 MB of text by default (`max` up to 4 MB); a file over 50 MB is refused. */
+    text(file: FileHandle | string, opts?: { pages?: number | string; max?: number }): Promise<{ text: string; pages: number | null; truncated: boolean }>
+  }
+  /** Since 0.10.3, uses.speech, the host half only. */
+  speech: {
+    /** The speech in an audio file handed to the plugin: WAV, webm/opus, ogg/opus, m4a (AAC) or mp3 (read from the content, not the name);
+     *  60 minutes and 200 MB at most. On Echo's own speech model (or the transcription server the user connected). Refused while Echo records
+     *  or transcribes a call: it doesn't queue, ask again. `language`: an ISO code, else the first of Settings' languages. `words` adds each
+     *  word's times when the engine timed every sentence. A long file outlasts the window half's ctx.call: start it from a command. */
+    transcribe(file: FileHandle | string, opts?: { words?: boolean; language?: string }): Promise<{ text: string; language: string; segments: Array<{ start: number; end: number; text: string }>; words?: Array<{ start: number; end: number; word: string }> }>
+  }
   /** Since 0.10.0, uses.m365.read: through Echo's sign-in, read-only. */
   m365: {
     search(query: string, opts?: { kinds?: string[]; days?: number; limit?: number }): Promise<{ query: string; results: Json; errors: Json }>

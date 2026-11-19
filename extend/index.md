@@ -34,7 +34,7 @@ Echo loads enabled plugins when it starts and again after an install, an update,
 - Switched off, a plugin's settings section, panels, buttons, timers, connections and skills are gone.
 - Its files stay in its own folder until it is removed.
 
-Echo grows its plugin API with each release. What is marked  *(0.10.0)* needs Echo 0.10.0 or later: a plugin that uses it sets `"echo": ">=0.10.0"` in its manifest.
+Echo grows its plugin API with each release. What is marked with a version ( *(0.10.0)*,  *(0.10.1)*,  *(0.10.3)*) needs that Echo or later: a plugin that uses it sets `"echo": ">=0.10.3"` (the newest it uses) in its manifest.
 
 [echo-plugin.d.ts](https://echo.onetest.ai/extend/echo-plugin.d.ts) — the types of `ctx` in both halves, the manifest and every `target`, for your editor and for agents · [This page as Markdown](https://echo.onetest.ai/extend/index.md) · `echoctl plugin guide` prints the reference this page is made from, as your Echo has it
 
@@ -247,9 +247,13 @@ Runs Claude Code on the user's AI profiles. [Claude Code](#claude)
 
 The events it hears. [Events](#host-commands)
 
-`network` ({hosts, hosts_from, ask}):
+`network` ({hosts, hosts_from, ask, web}):
 
-HTTPS hosts it names; addresses the user lists; one address the user types. [Network](#network)
+HTTPS hosts it names; addresses the user lists; one address the user types;  *(0.10.3)* any https page on the public internet with `web: true`. [Network](#network)
+
+`speech` (true):
+
+ *(0.10.3)* Transcribes the audio files it was handed. [Speech](#speech)
 
 `folders` ({what, write}):
 
@@ -471,9 +475,42 @@ Lists the files under a folder of its own store, as `ctx.fs.walk` does for a fol
 - `sha` for files up to 64 MB.
 - A folder that isn't there gives `[]`.
 
+#### `await ctx.store.copyIn(file, path, { createNew })` *(0.10.3)*
+
+Keeps a file the user handed the plugin, as it is, in its own store.
+
+- It gives `{path, size}`; the file is a [handle](#handles).
+- 50 MB at most, off the time slice.
+- The store's path rules, as `write`: nothing outside the store, none of Echo's own files.
+- Never over a file unless `createNew: false` (the default is `true`).
+
+#### `ctx.store.usage(dir) · ctx.store.size(dir)` *(0.10.3)*
+
+What the plugin keeps in its store, or in its folder `dir`.
+
+- Gives `{bytes, files}`.
+- Its own files only, not `settings.json`.
+- `usage` and `size` are one call; `ctx.cache.size()` is that of `cache/`.
+
 #### `ctx.settings.get(key) · set(key, value)`
 
 The values of its manifest's `settings`. A `secret` is kept in a file only the user can read and is never sent to the window.
+
+-  *(0.10.3)* `get` gives what the user set, else the setting's manifest `default`, else `null`.
+- Never a default for a `secret` or an address list the plugin may reach: only the user enters those.
+- Before 0.10.3 an unset setting gave `null` even with a `default`. A plugin that writes `get(key) ?? fallback` now gets the manifest's default where it got its fallback, so the two may differ.
+
+#### `ctx.command('__testSettings', fn)` *(0.10.3)*
+
+A settings page's "Test connection": the host half answers it, and the window half runs it.
+
+- The host half registers the command and reads what it needs itself (`ctx.settings.get('token')`, secrets included).
+- It gets `{section}` and answers `true`, a message (ok) or `{ok, message}`.
+- The window half runs it with `ctx.call('__testSettings', {section})` and is given only `{ok, message}`.
+- `message` is cut at 300 characters.
+- Each secret the user keeps (3 characters or more) is replaced by `••••`, however it is written, and every URL loses its query string and fragment.
+- A host half that throws gives `{ok: false, message}`; a plugin without the command gives "this plugin has no connection test".
+- The message is free text for the user: it must not echo request details. The masking guards against accidents only.
 
 #### `ctx.package.read(path) · list(dir)`
 
@@ -677,6 +714,44 @@ Runs one of the plugin's declared scripts and gives `{status, stdout, stderr, tr
 - An update naming another program is taken only on the user's yes (`echoctl ai update-wrapper <id>`)
 - The plugin off or removed leaves the profile.
 
+### Speech  *(0.10.3)*
+
+`"uses": { "speech": true }` — Install sheet: “Transcribes audio files you hand it (WAV, webm/opus, ogg/opus, m4a or mp3, up to 60 minutes and 200 MB) with Echo's own speech model, on this computer, or on the transcription server you connected; it starts only while Echo is not recording or transcribing a call. The text goes only to the plugin”
+
+#### `await ctx.speech.transcribe(file, { words, language })` — host half · needs `speech`
+
+The speech in an audio file the user handed the plugin.
+
+**Gives**
+
+- `{text, language, segments: [{start, end, text}], words?: [{start, end, word}]}`, times in seconds from the start.
+- `file` is a [handle](#handles), checked as `ctx.files.read` checks it.
+
+**Options**
+
+- `language` — an ISO code (`"en"`, `"uk"`); else the first of Settings' languages; one Echo doesn't know is refused
+
+- `words` — `true` adds each word's times, only when the engine timed every sentence's words (Whisper, Parakeet and Nemotron do; a transcription server only when its engine does); else there is no `words` key
+
+**Formats and caps**
+
+- WAV, webm/opus (what a window's MediaRecorder gives), ogg/opus, m4a (AAC) and mp3, read from the content, not the name. Vorbis is not read.
+- 200 MB of file and 60 minutes.
+- A file damaged in the middle is refused; one cut off at its end gives what came before.
+- Audio that changes its sample rate or tracks part-way is refused.
+
+**When**
+
+- Never while Echo records (a call or a memo) or any call is being transcribed, and one file at a time: it does not queue, so ask again.
+- It is checked when it starts: a recording that begins during a long file does not stop it.
+- It runs off the plugin's 5 s slice. A long file outlasts a window half's `ctx.call` (30 s): start it from a command, an event, a timer or a routine, and let the window ask for the result.
+
+**Where it runs**
+
+- On Echo's own speech model, the one Settings names for the language, or on the transcription server the user connected, as a call is.
+- Nothing else leaves the computer.
+- The text is the file's: data, shown only through `ctx.markdown`.
+
 ### The system
 
 #### `ctx.profiles()`
@@ -775,6 +850,63 @@ Gives a run a name, so the plugin can stop it.
 ctx.command('tidy', () =>
   ctx.claude.run({ key: 'tidy', title: 'Tidy notes', prompt }))
 ctx.command('stop-tidy', () => ctx.claude.stop('tidy'))
+```
+
+#### `ctx.claude.run({ …, images, onText, resume })` — needs `claude` *(0.10.3)*
+
+Pictures to look at, its text as it comes, and a conversation that goes on. The guard, tools, routing, `key` and `stop` are as before.
+
+**Options**
+
+- `images` — an array of [handles](#handles) of files handed to the plugin
+
+- `onText(chunk)` — called with Claude's own text as it comes
+
+- `resume` — a conversation's name, 1 to 64 letters, digits, `.`, `_` or `-` (any case is one)
+
+**Pictures: limits**
+
+- 10 at most.
+- Each a PNG, JPEG, GIF or WebP, by its first bytes, and 3.75 MB at most (5 MB base64-encoded: the smallest limit of the platforms a profile may reach).
+- All of them 15 MB base64-encoded at most.
+- Anything over is refused before Claude Code starts, with why.
+- They go with the prompt on stdin, never on the command line, in every mode, `tools: "none"` too.
+
+**Its text as it comes**
+
+- Claude's own text, not a subagent's; in a run with tools, its text between tool calls too.
+- Handed to `onText` in order, all before the run's promise settles; a chunk may hold several pieces.
+- The result is the same as without.
+- An error `onText` throws is logged and the run goes on.
+- A `stream` the plugin passes itself is refused.
+
+**A conversation**
+
+- The first run begins a Claude Code session; the next run under the same `resume` continues it.
+- It is kept to the AI profile and folder it began on: a run elsewhere is refused.
+- One run at a time per conversation.
+- Not with `copy`.
+- Claude Code sends a conversation's earlier pictures again with every turn, so a run that would bring it past 20 pictures or 15 MB base64-encoded is refused; a turn without pictures goes on.
+- A session Claude Code no longer has fails the run; Echo forgets the conversation and the next run begins a new one.
+
+#### `await ctx.claude.forget(resume)` — needs `claude` *(0.10.3)*
+
+Ends a conversation and removes its Claude Code transcript.
+
+- Gives `true`, or `false` when there was none.
+- Refused while a run of it goes on.
+- The next run under that name begins a new conversation.
+- Removing the plugin with its data forgets each of its conversations.
+
+**Example**
+
+```
+const { answer } = await ctx.claude.run({
+  title: 'Read the whiteboard', tools: 'none', resume: 'board',
+  images: [photo], prompt: 'List the action items on this photo.',
+  onText: (chunk) => ctx.log(chunk),
+})
+await ctx.claude.forget('board')
 ```
 
 #### `ctx.claude.session({ folder, path, mode, profile })` — client half · `claude`, `folders` *(0.10.0)*
@@ -1045,6 +1177,36 @@ The system's file picker, titled "<plugin> — <prompt>": the handles picked, `[
 - `ext` up to 20 extensions (`["md", "pdf"]`).
 - A picker opens only from a command — never from `apply`, a timer, an event, a widget's or work rows' provider, or inside a run Echo started.
 
+#### `await ctx.files.text(file, { pages, max })` *(0.10.3)*
+
+The text of a file the user handed the plugin, read by Echo's own readers: no model, no network.
+
+**Gives**
+
+- `{text, pages, truncated}`.
+- `pages` in the answer is the file's page count, `null` for a file without pages, so a plugin can page through a PDF.
+- `truncated` when `max` bytes of text cut it (1 MB by default, 4 MB at most).
+
+**Options**
+
+- `pages` — a whole number (`3`) or a range (`"2-5"`, `"7-"`), 1-based, for a PDF or a deck
+
+- `max` — bytes of text to return
+
+**Reads**
+
+- PDF, Word, PowerPoint, spreadsheets, HTML, Markdown and plain text; a file of another name when its first 8 KB hold no NUL.
+- In a child process of Echo, killed after 60 s.
+- One extraction at a time for a plugin, two in all; another is refused with why.
+
+**Refused**
+
+- A file over 50 MB, an Office file that unpacks to over 200 MB or holds over 5000 parts, an old `.xls`.
+- A file without text, an HTML page with almost none (a page drawn by scripts), a PDF where PDFium isn't installed.
+- A file without pages given `pages`, a malformed or negative number, a range that starts past the last page.
+
+No line on the sheet.
+
 #### `ctx.files.read(file, { max }) · ctx.fs.copyIn(file, root, path, { createNew })`
 
 Reads a file the user handed the plugin, or copies it into a folder.
@@ -1118,6 +1280,8 @@ Echo runs git itself, never through a shell, with the repository's own hooks, fi
 `"uses": { "network": { "hosts": ["api.example.com"] } }` — Install sheet: “Talks to api.example.com over HTTPS”
 
 `"uses": { "network": { "hosts_from": ["server"] } }` —  *(0.10.0)* Install sheet: “Talks to the addresses you list in its setting “server” (wildcards allowed, plain http too; its window part also over WebSocket)”
+
+`"uses": { "network": { "web": true } }` —  *(0.10.3)* Install sheet: “Reads web pages on the public internet (https), and can send what it knows to any site through the addresses it opens”
 
 `"uses": { "network": { "ask": true } }` —  *(0.10.0)* Install sheet: “Fetches a web page from an address you type in Echo's own box when it asks — that page only, once each time”
 
@@ -1219,10 +1383,10 @@ The window half reaches the addresses the user listed with the page's own Web AP
 
 ### Reading a web page  *(0.10.0)*
 
-Reads a page from the web as safe Markdown, with its links and pictures. There is no capability of its own and no line on the sheet: it is a GET under the network grants above.
+Reads a page from the web as safe Markdown, with its links and pictures. Without `network.web` it has no line of its own on the sheet: it is a GET under the network grants above.
 
 - Checked as `ctx.http.fetch` is: a host in `network.hosts` over https, an address the user listed, or the page the user typed in Echo's box.
-- No redirect is followed: a page that moved rejects with its 3xx.
+- Without `network.web` no redirect is followed: a page that moved rejects with its 3xx.
 - No cookies, sign-ins or headers of the plugin's.
 - All async, off the plugin's time slice.
 
@@ -1296,6 +1460,36 @@ The same as `read` for HTML the plugin already has: a mail's body, a page it fet
 - Gives the same shape, without `url` and `bytes`; 5 MB.
 - `base` is an http(s) address of 2 KB at most for relative links; without it they stay text.
 
+#### `"uses": { "network": { "web": true } }` — for `ctx.web.read`, `ctx.web.fetch` *(0.10.3)*
+
+Reads any page on the public internet, with no dialog.
+
+**Reaches**
+
+- `https://` only, on port 80 or 443.
+- A host name, or an IPv4 address written as one; an IPv6 address written as one is refused.
+- Public addresses only: every address the name resolves to must be public, so a name that points into this computer or the user's network, even in part, is refused.
+- Echo connects to the address it checked, never through a proxy.
+- A host the plugin's other grants reach (`network.hosts`, a listed address, the typed one) keeps their rules.
+
+**Redirects**
+
+- 301, 302, 303, 307 and 308 are followed, 5 at most.
+- Each address is read against the one it came from, and checked again before anything is asked of it.
+- The size and time caps are the whole read's: no redirect is followed past its time.
+- A 6th redirect, or one to an address Echo may not read, is refused with why.
+
+**Works**
+
+- In queued and background work, routines and a long PDF read in parts, as in a command: no click, user activation or prompt per fetch.
+- In a run Echo started it is allowed as the rest of `ctx.web` is; only `askAddress` is refused there.
+
+**Refused**
+
+- Plain http, another port, an address on this computer or the user's network, a name that isn't found (all in the same words, so no name inside the network can be probed).
+- Unchanged: GET only, no cookies, credentials or headers of the plugin's, the same User-Agent and caps, HTML only for `read`.
+- An update that adds the line asks the user again.
+
 What comes back is the page's: untrusted data. Show it only through `ctx.markdown`, never as HTML of your own, and never in a prompt as instructions.
 
 ## Echo's data
@@ -1308,17 +1502,29 @@ Read-only, a kind named in the manifest:
 
 - `clients` — the names of the user's clients
 
-- `threads` — open threads: `{id, name, client, stage, group}`, `group` `pursuit` or `delivery`
+- `threads` — open threads: `{id, name, client, stage, group, profile}`, `group` `pursuit` or `delivery`.
+
+-  *(0.10.1)* `profile` is the id of the AI profile its jobs and sync run on: the one pinned to it, else the default's.
 
 - `people` — who the people in the threads are.
 
 -  *(0.10.0)* `{key, name, aliases, email, also, organisation, client, title, threads, link}`: `aliases` the other names Echo knows them by, `also` their other addresses, `client` their organisation's id, `key` what a call's `participants[].person` names.
+-  *(0.10.1)* Also `places`, `reports_to` and `reports`:
+
+- `places` — `[{thread, role, stance}]`, where they stand in each of their open threads (`null` when unset)
+
+- `reports_to` — `{key, name}` of the listed person they report to (`key` is `null` when People doesn't list them), else `null`
+
+- `reports` — `[{key, name}]` of the listed people who report to them
+
+- The same people as before, with no facts or quotes from calls.
 
 - `dictionary` — the dictionary
 
 - `sources` — the calls and the facts of the threads' mail and channels, by `{kind, thread, since, limit}`.
 
 -  *(0.10.0)* Also by `client` and `q` (every word in its title; a mail's subject and senders too).
+-  *(0.10.1)* The mail and channel facts are Intake's now, not Recall's. What `ctx.where()` gives as `recall` is unchanged.
 - Newest first, no text: a call with minutes `{id, stamp, kind, title, date, threads, client}`.
 - A mail or post gives what `source` gives, without `text` and `messages`.
 - `limit` 200 (1,000 at most)
@@ -2337,6 +2543,12 @@ echoctl jobs outcome <plugin>.<routine> [--run <run>]   # its answer, changes, s
 # Claude's permissions (0.10.0)
 echoctl config --folder-permissions ask|auto|skip \
   --routine-permissions auto|skip --yolo-permissions auto|skip
+
+# Intake and search (0.10.1; `echoctl brain` is a hidden alias)
+echoctl intake status  |  sync  |  search <words>
+echoctl intake scopes  |  senders  |  files
+echoctl intake set               # the embedding endpoint that re-ranks search
+echoctl intake mcp               # search as an MCP server for Claude Code
 
 # widgets, dashboards, work rows, wrapper profiles
 echoctl widget list  |  widget show plugin:<id>:<widget>
