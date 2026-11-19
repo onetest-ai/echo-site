@@ -1390,7 +1390,7 @@ Reads a page from the web as safe Markdown, with its links and pictures. Without
 - No cookies, sign-ins or headers of the plugin's.
 - All async, off the plugin's time slice.
 
-#### `ctx.web.read(url, { max, timeout, images })`
+#### `ctx.web.read(url, { max, timeout, images, render })`
 
 The page's main part as Markdown, with what the page says about itself.
 
@@ -1414,7 +1414,7 @@ The page's main part as Markdown, with what the page says about itself.
 - Never compressed: a `Content-Encoding` other than identity rejects.
 - 5 MB (`max` less), read as it comes; 30 seconds (`timeout` less).
 - The charset the server or the page names, else UTF-8.
-- A page's scripts are never run. What it embeds (JSON-LD, a framework's JSON state, `<noscript>`) is read as data, and used when it is clearly fuller than the HTML.
+- A page's scripts are never run, unless `render: true` ([below](#rendered-page)). What it embeds (JSON-LD, a framework's JSON state, `<noscript>`) is read as data, and used when it is clearly fuller than the HTML.
 
 **What is never markup**
 
@@ -1444,6 +1444,51 @@ await ctx.fs.write(root, 'Clips/pilot.md', `# ${page.title}\n\n${page.markdown}`
 for (const i of page.images)
   if (i.saved) await ctx.fs.copyIn(i.saved, root, `Clips/${i.saved.name}`)
 ```
+
+#### `ctx.web.read(url, { render: true })` — needs `network.web` *(0.10.3)*
+
+Reads a page as a browser shows it, its JavaScript run, for a page that builds itself with scripts.
+
+**Gives**
+
+- The same shape as a normal read (Markdown, links, pictures, escaping, limits), plus `rendered: true`.
+- `bytes` is the size of the page's DOM as HTML; `images: 'save'` works as for a public page.
+
+**Which pages**
+
+- Public https pages only, checked as [the public web](#public-web) is checked.
+- A page reached through the plugin's other grants, plain http, another port, this computer or the user's network is refused before anything is asked.
+- Without `network.web` it is refused, naming the line the sheet doesn't ask for.
+- `render` other than `true` or `false` is refused.
+
+**Where it runs**
+
+- A hidden browser view in a child process of Echo, with no window or Dock icon, apart from Echo's window and the plugin's `ctx`.
+- Nothing persists: cookies, storage and cache last only for that render.
+- Downloads, popups and permissions (camera, microphone, location, notifications) are denied.
+- Only the DOM's HTML and the address the page ended at come back.
+
+**Its network**
+
+- Every connection goes through Echo's public-address check, on port 443 only; never to this computer or the user's network.
+- Media, workers (dedicated, shared and service), WebRTC, WebTransport and notifications are blocked.
+- No event from the page can activate a link.
+- The page's own requests to public hosts are allowed, and it sees the user's public IP.
+
+**Limits**
+
+- 30 seconds (`timeout` less).
+- One render per plugin and two in all; another is refused: “is already rendering a page: one at a time”.
+- 5 moves of the main frame; 250,000 elements.
+- 5 MB of HTML (`max` less, then `truncated`).
+- 64 connections (16 at once), 32 hosts, 25 MB through the check.
+
+**Platforms**
+
+- macOS.
+- Windows: refused, “rendering a page isn't on Windows yet: read it without render”.
+
+The page's words are untrusted data, as any page's.
 
 #### `ctx.web.fetch(url, { max })`
 

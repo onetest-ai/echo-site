@@ -440,6 +440,8 @@ export interface WebPage {
   source: 'html' | 'json-ld' | 'state' | 'noscript' | 'meta'
   /** Under 200 characters of text on a page with scripts. */
   needs_js: boolean; truncated: boolean; bytes: number
+  /** Since 0.10.3: true when the page was read with render: true (its JavaScript run); `bytes` is then the DOM's HTML. */
+  rendered?: boolean
 }
 
 export interface FsStat { kind: 'file' | 'dir' | 'link' | 'other'; size: number; mtime: number; real: string | null; sha?: string }
@@ -579,9 +581,11 @@ export interface HostContext {
    *  no redirect followed. Since 0.10.3, with uses.network.web: any https page on the public internet (port 80 or 443, public
    *  addresses only), up to 5 redirects, each checked again. What comes back is untrusted: show it only through ctx.markdown. */
   web: {
-    /** HTML only, 5 MB (`max` less), 30 s (`timeout` less). `images: 'save'` also downloads its pictures (50, 10 MB each) into cache/web/;
+    /** Since 0.10.3 `render: true` (needs uses.network.web; public https pages only; macOS, refused on Windows): the page as a browser shows it, its
+     *  JavaScript run, in a hidden isolated renderer that keeps nothing; 30 s, one render per plugin and two in all; the result has `rendered: true`.
+     *  HTML only, 5 MB (`max` less), 30 s (`timeout` less). `images: 'save'` also downloads its pictures (50, 10 MB each) into cache/web/;
      *  a picture may come from any public host (the one widening: GET, https, port 80 or 443, a public address only). */
-    read(url: string, opts?: { max?: number; timeout?: number; images?: 'save' }): Promise<WebPage>
+    read(url: string, opts?: { max?: number; timeout?: number; images?: 'save'; render?: boolean }): Promise<WebPage>
     /** One file the plugin may reach, as a handle; 10 MB (`max` up to 50 MB), 2 minutes. */
     fetch(url: string, opts?: { max?: number }): Promise<FileHandle & { type: string }>
     /** The same as read for HTML the plugin has; nothing is fetched. `base` (http(s), 2 KB) resolves relative links. 5 MB. */
