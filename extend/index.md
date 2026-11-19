@@ -1485,8 +1485,7 @@ Reads a page as a browser shows it, its JavaScript run, for a page that builds i
 
 **Platforms**
 
-- macOS.
-- Windows: refused, “rendering a page isn't on Windows yet: read it without render”.
+- macOS and Windows: a hidden WKWebView on macOS, a hidden WebView2 on Windows, behind the same gate, with the same limits.
 
 The page's words are untrusted data, as any page's.
 

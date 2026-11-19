@@ -581,7 +581,7 @@ export interface HostContext {
    *  no redirect followed. Since 0.10.3, with uses.network.web: any https page on the public internet (port 80 or 443, public
    *  addresses only), up to 5 redirects, each checked again. What comes back is untrusted: show it only through ctx.markdown. */
   web: {
-    /** Since 0.10.3 `render: true` (needs uses.network.web; public https pages only; macOS, refused on Windows): the page as a browser shows it, its
+    /** Since 0.10.3 `render: true` (needs uses.network.web; public https pages only; macOS and Windows): the page as a browser shows it, its
      *  JavaScript run, in a hidden isolated renderer that keeps nothing; 30 s, one render per plugin and two in all; the result has `rendered: true`.
      *  HTML only, 5 MB (`max` less), 30 s (`timeout` less). `images: 'save'` also downloads its pictures (50, 10 MB each) into cache/web/;
      *  a picture may come from any public host (the one widening: GET, https, port 80 or 443, a public address only). */
