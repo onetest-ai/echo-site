@@ -40,7 +40,8 @@ export interface EchoPluginManifest {
   routines?: RoutineDef[]
   /** Its package skill folders, e.g. ["skills/staffing"] (at most 10 with its runtime skills). */
   skills?: string[]
-  /** Its part for Claude in Echo (the agent/ folder): `summary` one line ≤ 200; `prefix` 2–4 of a–z 0–9. */
+  /** Its part for Claude in Echo (the agent/ folder): `summary` one line ≤ 200 (its row in Echo's core; without it the manifest's `summary` is);
+   *  `prefix` 2–4 of a–z 0–9. */
   agent?: { summary?: string; prefix?: string }
   /** An .svg in its folder (≤ 16 KB), beside its work rows and ⌘K entries. */
   icon?: string
@@ -100,6 +101,8 @@ export interface Uses {
   skills?: boolean
   /** Since 0.10.3: its host half transcribes audio files it was handed (ctx.speech.transcribe). */
   speech?: boolean
+  /** Since 0.10.5: its host half lists what other plugins offer (ctx.plugins.list, get) and calls their commands (ctx.plugins.call). */
+  plugins?: boolean
 }
 
 export type EchoReadKind = 'clients' | 'threads' | 'people' | 'dictionary' | 'sources' | 'source' | 'calls' | 'calendar' | 'me' | 'recording'
@@ -334,8 +337,16 @@ export interface ClaudeRun {
   profile?: string
   model?: string
   /** Since 0.10.0: left out, the user's setting for routines; "auto"; "skip" (only with uses.claude.skip);
-   *  "none" (no tools). "read" and "folder", from before, are taken as "auto". Ignored in a folder run. */
-  tools?: 'auto' | 'skip' | 'none' | 'read' | 'folder'
+   *  "none" (no tools). "read" and "folder", from before, are taken as "auto". Ignored in a folder run.
+   *  Since 0.10.6: "files" — Read, Write, Edit, Glob and Grep only, only in the `store` folder, nothing asked, every other path denied;
+   *  no Bash, web, Skill or MCP server, none of Echo's session. Needs `store`; refused with `folder` or with a link anywhere in the folder.
+   *  Its record shows asked: "files" and its record and log say "files only". The user's own Claude Code settings still apply. */
+  tools?: 'auto' | 'skip' | 'none' | 'files' | 'read' | 'folder'
+  /** Since 0.10.5: a folder of the plugin's own store, such as "cache/pages" (needs only uses.claude): Claude starts there with every tool
+   *  and Echo's session, no project of its own, its prompt saying the files are data; its record's `asked` is "store". Never the store
+   *  itself, `runs/`, a link, a file, a folder not there, the run's `dir` or one holding it, or one holding `.claude`;
+   *  not with `folder`, `path`, `mode` or `exclude`. No sandbox: it reaches the data folder. */
+  store?: string
   /** Its working folder, relative to the plugin's store (default runs/<time>). */
   dir?: string
   /** Minutes, 1–60 (default 20). */
@@ -446,6 +457,26 @@ export interface WebPage {
 
 export interface FsStat { kind: 'file' | 'dir' | 'link' | 'other'; size: number; mtime: number; real: string | null; sha?: string }
 
+/** Since 0.10.5: what ctx.expose() returns. */
+export interface ExposeApi {
+  /** Offers a command, at most 20 a plugin. `name`: 1–40 letters, digits, `-`, `_`, not starting `__`, and not one `ctx.command` took.
+   *  `fn` is `ctx.command`'s, and its second argument also has `from`: the caller's id, "claude" from Claude in Echo, absent when the plugin
+   *  calls it as its own. Echo reads the arguments from the destructuring of `fn`'s first parameter: a name with a default, or in
+   *  `({a} = {})`, is optional; a parameter not destructured leaves them unknown. */
+  command(
+    name: string,
+    fn: (args: Record<string, Json>, ctx: { files: FileHandle[]; from?: string }) => Json | void | Promise<Json | void>,
+    opts: {
+      /** 1–300 characters: when to call it. */
+      description: string
+      /** A line for an argument, or an optional argument of its own. */
+      args?: Record<string, string>
+      /** true: it only reads, so a run that only reads may call it. Echo trusts the mark. */
+      reads?: boolean
+    },
+  ): void
+}
+
 export interface HostContext {
   /** The plugin's id. */
   id: string
@@ -459,6 +490,21 @@ export interface HostContext {
    *  ctx.settings.get, and answers true, a message or `{ok, message}`; the window half runs it with ctx.call('__testSettings', {section})
    *  and is given only `{ok, message}` (message cut at 300 characters, the user's secret values replaced by ••••, URLs without query). */
   command(name: string, fn: (args: Record<string, Json>, ctx: { files: FileHandle[] }) => Json | void | Promise<Json | void>): void
+  /** Since 0.10.5: offers the plugin's commands to other plugins and Claude in Echo; opt-in (a plugin that doesn't call it is invisible to them).
+   *  Call it once, first in `apply`, with no `await` or condition before it: Echo finds the offer by a dry run of `apply`. A second call throws.
+   *  What the plugin is for is the manifest's `agent.summary`, else `summary`; any text passed here is ignored.
+   *  Guard for an older Echo: `ctx.expose ? ctx.expose() : null`. */
+  expose?(): ExposeApi
+  /** Since 0.10.5, uses.plugins: what other plugins offer, and their commands. */
+  plugins: {
+    /** The plugins that offer commands. */
+    list(): Promise<Array<{ id: string; name: string; description: string }>>
+    /** One of them, with its commands. */
+    get(id: string): Promise<{ id: string; name: string; description: string; commands: Array<{ name: string; description: string; reads: boolean }> }>
+    /** Calls a command and gives its answer (30 s at most). Refused: a plugin that offers nothing, a command not offered, a required argument
+     *  missing, the plugin's own command, and past 16 calls between plugins waiting at once. No picker opens in the call. */
+    call(id: string, name: string, args?: Record<string, Json>): Promise<Json>
+  }
   /** Every `seconds` (at least 10) while Echo runs. Needs uses.schedule. */
   every(seconds: number, fn: () => void | Promise<void>): void
   /** Hear an event the manifest names (uses.events.on); refused for one it doesn't. */
