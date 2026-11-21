@@ -943,7 +943,22 @@ export interface ClientContext {
   openEchoPanel(view: string): void
   settings: {
     /** Its own page in Settings → From plugins; address #settings/<plugin>:<id>. */
-    section(s: { id?: string; label: string; icon?: string; badge?(): string | number; render(): string }): void
+    section(s: {
+      id?: string
+      label: string
+      icon?: string
+      badge?(): string | number
+      /** Since 0.10.8: Echo's fields for `settings` go where the HTML has `<!--echo-settings-->` (the first; later ones stay comments). */
+      render(): string
+      /** Since 0.10.7: manifest settings the section shows as Echo's fields, in order. A key, or `{ key, draw: false }` for one it takes in its own flow
+       *  (no field; ignored for an address list, which is drawn with an error line). An unknown key shows an error line; a key twice counts once. */
+      settings?: Array<string | { key: string; draw?: boolean }>
+      /** Since 0.10.7: where the fields go when the HTML has no mark: above (default) or below. */
+      settingsAt?: 'top' | 'bottom'
+      /** Since 0.10.7: called once Echo's settings show a saved change of a key this section claims, or after 3 s; the section is drawn again.
+       *  Not called for a refused save, a secret replaced by another, or a plugin switched off or reloaded meanwhile. */
+      changed?(key: string): void
+    }): void
     /** Extra content on its card in Settings → Plugins. */
     add(card: unknown): void
   }
