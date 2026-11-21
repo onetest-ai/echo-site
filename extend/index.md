@@ -2201,6 +2201,60 @@ ctx.settings.section({
 
 Its address is `#settings/<plugin>:<id>` — `ctx.go('settings/standup:main')` opens it. The values of the manifest's `settings` get a card in Settings → Plugins on their own; `ctx.settings.add(card)` adds to that card.
 
+#### `ctx.settings.section({ settings, settingsAt, changed })` *(0.10.7)*
+
+Shows manifest settings in the plugin's own Settings page, drawn and saved by Echo as on Settings → Plugins.
+
+**Options**
+
+- `settings`  *(0.10.7)* — the manifest settings to show, in order: a key, or `{ key, draw: false }` for one the section takes in its own flow, with no field
+
+- `settingsAt`  *(0.10.7)* — `'bottom'` puts the fields below what `render()` gives; left out, they are above
+
+- `changed(key)`  *(0.10.7)* — called after a save of a setting this section claims
+
+**Gives**
+
+- The fields appear under “Its settings”, in the order listed.
+- An address list is drawn with its notes.
+- A secret shows only as set or not: type to replace it, or Forget.
+- A bool is a switch.
+- A secret's value never reaches the plugin's code.
+-  *(0.10.8)* The fields go where `render()`'s HTML has `<!--echo-settings-->`: the first one, and later ones stay as comments.
+- Without that mark they are above, or below with `settingsAt: 'bottom'`.
+- `changed(key)` runs on the section that claims the key once Echo's settings show the change, or after 3 s.
+- The section is drawn again after it.
+- A refused save, or a secret replaced by another, shows no change: `changed` then comes after the 3 s.
+- On Settings → Plugins, while the plugin is on and its window part has loaded, the claimed settings are one row per section: its labels, “Set in <label>” and Open.
+- When the plugin is off, the fields are there again.
+
+**Refused**
+
+- An unknown key shows ““x” isn't one of its settings”.
+- `draw: false` on an address list is ignored: the field is drawn, with an error line, because only Echo takes addresses.
+- `changed` is not called if the plugin was switched off or reloaded meanwhile.
+
+**Limits**
+
+- A key listed twice counts once.
+- Saving an address list changes the window's network policy, so the window reloads itself a few seconds later.
+- The client state then starts fresh: work out status on load.
+
+**Example**
+
+```
+ctx.settings.section({
+  id: 'main',
+  label: 'Acme voice',
+  settings: ['server', 'api_key'],
+  changed: () => { check(); ctx.render() },
+  render: () => `<h2>Acme voice</h2>
+    <p>Speech server and key.</p>
+    <!--echo-settings-->
+    <p>${status}</p>`,
+})
+```
+
 ### A ⌘K action
 
 The ⌘K palette (Ctrl+K on Windows), in a group of its own.
