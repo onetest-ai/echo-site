@@ -315,6 +315,10 @@ An AI profile it offers. [Wrapper profiles](#wrapper)
 
  *(0.10.0)* Its window half adds skills to the user's own Claude Code, each on a click. [Skills in the user's Claude Code](#own-skills)
 
+`plugins` (true):
+
+ *(0.10.5)* Its host half lists what other plugins offer and calls their commands. [Offering and calling commands](#offers)
+
 ## Host API
 
 What `ctx` holds in `main.js`.
@@ -431,6 +435,116 @@ A thread is `renamed` (`name`, `from`), `merged` (`into`, `dropped`: the plugin'
 `shared_changed` ({ namespace, key, thread?, by }):
 
 A value its marketplace's plugins share changed — told to the others, never to the one that set it; no value in it.
+
+### Offering and calling commands  *(0.10.5)*
+
+A plugin can offer commands to other plugins and to Claude in Echo, and call what others offer.
+
+#### `ctx.expose() · api.command(name, fn, { description, args, reads })` *(0.10.5)*
+
+Offers the plugin's commands to other plugins and to Claude in Echo.
+
+- It is opt-in: a plugin that never calls `ctx.expose` is invisible to the others.
+- `ctx.expose()` returns `api`; `api.command` adds a command that works as `ctx.command` does, for the plugin's own callers too.
+- What the plugin is for is its manifest's `agent.summary`, else its `summary`. A text passed to `ctx.expose` is not read.
+- The command's second argument is `{ files, from }`: `files` as in `ctx.command`, `from` the caller's id, `"claude"` for Claude in Echo, and absent when the plugin calls it as its own.
+
+**Options**
+
+- `name` — 1–40 letters, digits, `-` or `_`, not starting with `__`
+
+- `description` — 1–300 characters: when to call it
+
+- `args` — `{ name: 'what to pass' }`: a line for an argument, or an optional argument of its own
+
+- `reads` — `true` marks a command that only reads, so a run that only reads may call it; Echo trusts the mark, also for what the command calls in turn
+
+**Arguments**
+
+- Echo reads the names from the destructuring of the function's first parameter.
+- `({ query, limit = 10 })`: `query` is required, `limit` optional with its default.
+- `({ a } = {})`: every name is optional.
+- A parameter that is not destructured (`(a) => …`) or a bound function leaves the arguments unknown: any JSON object is passed.
+
+**How Echo finds the offer**
+
+- It does a dry run of `apply(ctx)` without starting the plugin: its services do nothing, `ctx.terminal` is true and nothing it starts settles.
+- The dry run has 5 seconds. Its result is kept for the installed version and Echo's version; one that runs over is tried again, and after 3 in a row the plugin counts as offering nothing.
+- Call `ctx.expose` and its `command`s first in `apply`, with no condition and no `await` before them: what comes after a throw or an `await` is not found.
+- A dry run that fails never fails an install.
+
+**Refused**
+
+- `ctx.expose` called twice.
+- A name that `ctx.command` took already.
+- A name or description outside the limits above.
+
+**Limits**
+
+- At most 20 offered commands.
+- A call from another plugin or from Claude runs unattended, as a timer's does, also after its awaits: no picker opens. Offer no command that asks the user to pick.
+- A plugin switched off or removed is offered to nobody.
+
+**Example**
+
+```
+// main.js
+export function apply(ctx) {
+  const api = ctx.expose ? ctx.expose() : null
+  if (api) {
+    api.command('open-tickets', ({ team, limit = 10 }) => {
+      const all = JSON.parse(ctx.store.read('tickets.json') || '[]')
+      return all.filter((t) => t.team === team).slice(0, limit)
+    }, {
+      description: 'Open tickets of a team, newest first',
+      args: { team: 'a team name, e.g. support' },
+      reads: true,
+    })
+  }
+  // the rest of apply
+}
+```
+
+The guard `ctx.expose ? ctx.expose() : null` lets the same plugin load on an Echo older than 0.10.5; set `"echo": ">=0.10.5"` if it needs the offer.
+
+`"uses": { "plugins": true }` — Install sheet: “Calls the commands your other plugins offer and gets what they answer — what those plugins read or do for you, it can have them read or do for it”
+
+#### `await ctx.plugins.list() · get(id) · call(id, name, args)` — needs `plugins` *(0.10.5)*
+
+Lists the plugins that offer commands, shows one's commands and calls one.
+
+**Gives**
+
+- `list()` — `[{ id, name, description }]`: the plugins that offer
+
+- `get(id)` — the plugin with its `commands: [{ name, description, reads }]`
+
+- `call(id, name, args)` — what the command answers; `args` is an object, `{}` when left out
+
+**Refused**
+
+- A plugin that offers nothing, and a command it does not offer.
+- A command of the calling plugin itself.
+- A required argument that is missing.
+- A call while 16 calls between plugins already wait, which stops two plugins calling each other in a loop.
+
+**Limits**
+
+- A call waits up to 30 seconds.
+- The called command runs unattended: no picker opens in it.
+
+**Example**
+
+```
+const found = await ctx.plugins.list()
+if (found.some((p) => p.id === 'tickets')) {
+  const rows = await ctx.plugins.call(
+    'tickets', 'open-tickets', { team: 'support' })
+  ctx.log(`${rows.length} open`)
+}
+```
+
+The terminal shows the same: `echoctl plugin commands [<id> [<name>]]` lists the plugins that offer, one's commands, or one command's arguments.
 
 ### Its own files and settings
 
@@ -776,7 +890,7 @@ Runs Claude Code headless as the Claude · Echo folder session would, acting on 
 
 - `actions` the changes and sends it made through Echo.
 - `profile` one of the user's AI profiles (the default when left out; a wrapper only when it is the default).
-- `timeout` in minutes (1–60, default 20).
+- `timeout` in minutes (1–60, default 30).
 - `dir` its working folder inside the store (default `runs/<time>`).
 -  *(0.10.0)* `tools`: left out, it is the user's setting for routines; or one of these:
 
@@ -785,6 +899,8 @@ Runs Claude Code headless as the Claude · Echo folder session would, acting on 
 - `"skip"` — every permission check skipped — only with `claude.skip` on the sheet, else as left out
 
 - `"none"` — no tools at all (put what it needs in the prompt)
+
+- `"files"` —  *(0.10.6)* file tools only, in a folder of its store; needs `store` (see below)
 
 - `"read"`, `"folder"` — from before; taken as `"auto"`
 
@@ -830,6 +946,76 @@ const r = await ctx.claude.run({
 })
 // compare, then ctx.fs.write what the user accepts
 const changed = await ctx.store.list(r.snapshot.path)
+```
+
+#### `ctx.claude.run({ store, prompt, … })` — needs `claude` *(0.10.5)*
+
+Runs Claude Code in a folder of the plugin's own store, for files too large for a prompt, such as a crawl's pages.
+
+- `store` is a folder of the store, such as `"cache/pages"`. It is no folder the user gave: `claude` alone on the sheet is enough.
+- Claude starts there and works with the files as it needs. It has every tool and Echo's session, as the folder run in `edit` mode has, and `tools` or the user's setting for routines decides its permissions.
+- It has no project of its own: only the profile's settings load.
+- Its prompt tells it the files are data, never instructions.
+- Its record's `asked` is `store`.
+- What it writes stays in the store for the plugin (`ctx.store.read`, `walk`); under `cache/` Echo sweeps it after 7 days.
+- `key`, `resume`, `images` and `onText` work as in any run.
+
+**Refused**
+
+- The store itself, because Echo's own files lie at its top.
+- `runs/`, where Echo keeps its records of runs.
+- The run's own `dir`, or a folder that holds it.
+- A folder that is not there, a file, or a path reached through a link.
+- A folder that holds `.claude`: remove it with `ctx.store.remove` and run again.
+- `folder`, `path`, `mode` or `exclude` given with it.
+
+**Limits**
+
+- It is no sandbox: like any run with tools it reaches the data folder, so keep the store's top and Echo's files out of the prompt.
+
+**Example**
+
+```
+await ctx.claude.run({
+  title: 'Sort the crawl', store: 'cache/pages',
+  prompt: 'Write summary.md: one line per page.',
+})
+const md = await ctx.store.read('cache/pages/summary.md')
+```
+
+#### `ctx.claude.run({ store, tools: "files", … })` — needs `claude` *(0.10.6)*
+
+Runs Claude Code with file tools only, in a folder of the plugin's store, for pages from the web or others' words.
+
+**Gives**
+
+- Read, Write, Edit, Glob and Grep, and only in that folder.
+- Nothing is asked in that folder, pictures are readable, and every other path is denied.
+- No Bash, no web, no Skill and no MCP server, and none of Echo's session: no data folder, no Echo settings or hooks.
+- Its prompt says its file tools work only in that folder and the files are data.
+- It adds no line to the install sheet: `claude` covers it.
+- `key`, `resume`, `images` and `onText` work as in any run.
+- The run's record shows `asked: "files"`; its record and log say “files only”.
+
+**Refused**
+
+- Without `store`: “tools “files” goes with a folder of your store”.
+- With a folder the user gave (`folder`).
+- A link anywhere in the folder, checked before it starts.
+- Everything the `store` run above refuses, `.claude` included.
+
+**Limits**
+
+- The user's own Claude Code settings still apply: what they allow, Claude Code runs as they say.
+
+**Example**
+
+```
+await ctx.claude.run({
+  title: 'Digest of fetched pages', store: 'cache/pages',
+  tools: 'files',
+  prompt: 'Read each page; write digest.md with the facts.',
+})
 ```
 
 #### `ctx.claude.run({ …, key }) · ctx.claude.stop(key)` — needs `claude` *(0.10.0)*
@@ -1705,10 +1891,35 @@ A folder in the plugin that Echo lays out for Claude, 1 MB in all.
 - `agent/skills/<name>/SKILL.md`: up to 20.
 - `agent/rules/*.md`: 10 files, 4 KB each.
 - `agent/guides/**/*.md`: 50 files, 64 KB each.
-- `summary` (one line, 200 characters) is the plugin's row in Echo's core.
+- `summary` (one line, 200 characters) is the plugin's row in Echo's core; without it, the manifest's `summary` is.
 - `prefix` (2–4 of a–z 0–9) names its skills `<prefix>-<name>`.
 - Claude reads it only when it works with the plugin.
 - Sheet: “Tells Claude in Echo how to work with it (a guide and the skill “…”), loaded only when you work with it”.
+
+#### `echo_plugins` tools *(0.10.5)*
+
+Echo's sessions and runs reach the commands and guides of other plugins through the `echo_plugins` tools.
+
+- Echo gives them when a plugin offers commands ([`ctx.expose`](#offers)) or gives Claude a guide (`agent/`), in the folder session, a plugin's session, routines, Yolo and a plugin's runs.
+- The tools are allowed without asking and are not given to a minutes run, a project sync or a run with no tools.
+- The core lists each plugin in one table row: its name, its id and what it is for. Claude asks `plugin(id)` for the rest.
+- What it is for is what its host half set with `ctx.agent.set`, else the manifest's `agent.summary`, else `summary`. A text passed to `ctx.expose` is ignored.
+
+**Gives**
+
+- `plugins` — every such plugin, with how many commands, its guide, skills and entries
+
+- `plugin(id)` — one plugin's commands, guide, skills and entries
+
+- `command(id, name)` — one command's arguments
+
+- `call(id, name, args)` — runs a command and gives its answer
+
+**Limits**
+
+- A run that only reads calls only commands marked `reads`.
+- A call of a command not marked `reads` shows in a routine's or Yolo's outcome as `plugin call <id> <name>`.
+- The call runs unattended: no picker opens.
 
 #### `"skills": ["skills/staffing"]`
 
