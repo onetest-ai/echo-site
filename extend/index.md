@@ -2224,6 +2224,7 @@ Shows manifest settings in the plugin's own Settings page, drawn and saved by Ec
 - Without that mark they are above, or below with `settingsAt: 'bottom'`.
 - `changed(key)` runs on the section that claims the key once Echo's settings show the change, or after 3 s.
 - The section is drawn again after it.
+- A refused save, or a secret replaced by another, shows no change: `changed` then comes after the 3 s.
 - On Settings → Plugins, while the plugin is on and its window part has loaded, the claimed settings are one row per section: its labels, “Set in <label>” and Open.
 - When the plugin is off, the fields are there again.
 
@@ -2231,7 +2232,6 @@ Shows manifest settings in the plugin's own Settings page, drawn and saved by Ec
 
 - An unknown key shows ““x” isn't one of its settings”.
 - `draw: false` on an address list is ignored: the field is drawn, with an error line, because only Echo takes addresses.
-- A refused save, or a secret replaced by another, shows no change: `changed` is not called.
 - `changed` is not called if the plugin was switched off or reloaded meanwhile.
 
 **Limits**
