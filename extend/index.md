@@ -890,7 +890,7 @@ Runs Claude Code headless as the Claude · Echo folder session would, acting on 
 
 - `actions` the changes and sends it made through Echo.
 - `profile` one of the user's AI profiles (the default when left out; a wrapper only when it is the default).
-- `timeout` in minutes (1–60, default 20).
+- `timeout` in minutes (1–60, default 30).
 - `dir` its working folder inside the store (default `runs/<time>`).
 -  *(0.10.0)* `tools`: left out, it is the user's setting for routines; or one of these:
 

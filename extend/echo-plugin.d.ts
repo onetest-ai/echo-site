@@ -349,7 +349,7 @@ export interface ClaudeRun {
   store?: string
   /** Its working folder, relative to the plugin's store (default runs/<time>). */
   dir?: string
-  /** Minutes, 1–60 (default 20). */
+  /** Minutes, 1–60 (default 30). */
   timeout?: number
   /** Since 0.10.0, with uses.folders: a root as ctx.fs.folders() names it — the run is that folder's own project. */
   folder?: string
