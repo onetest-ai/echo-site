@@ -995,6 +995,7 @@ Runs Claude Code with file tools only, in a folder of the plugin's store, for pa
 - Its prompt says its file tools work only in that folder and the files are data.
 - It adds no line to the install sheet: `claude` covers it.
 - `key`, `resume`, `images` and `onText` work as in any run.
+- The run's record shows `asked: "files"`; its record and log say “files only”.
 
 **Refused**
 
@@ -1006,7 +1007,6 @@ Runs Claude Code with file tools only, in a folder of the plugin's store, for pa
 **Limits**
 
 - The user's own Claude Code settings still apply: what they allow, Claude Code runs as they say.
-- The run's record shows `asked: "files"`; its record and log say “files only”.
 
 **Example**
 
@@ -1901,9 +1901,9 @@ A folder in the plugin that Echo lays out for Claude, 1 MB in all.
 Echo's sessions and runs reach the commands and guides of other plugins through the `echo_plugins` tools.
 
 - Echo gives them when a plugin offers commands ([`ctx.expose`](#offers)) or gives Claude a guide (`agent/`), in the folder session, a plugin's session, routines, Yolo and a plugin's runs.
-- The tools are allowed without asking and are not given to a minutes run, a project sync, the window's session on a call or a run with no tools.
+- The tools are allowed without asking and are not given to a minutes run, a project sync or a run with no tools.
 - The core lists each plugin in one table row: its name, its id and what it is for. Claude asks `plugin(id)` for the rest.
-- What it is for is the manifest's `agent.summary`, else `summary`. A text passed to `ctx.expose` is ignored.
+- What it is for is what its host half set with `ctx.agent.set`, else the manifest's `agent.summary`, else `summary`. A text passed to `ctx.expose` is ignored.
 
 **Gives**
 
